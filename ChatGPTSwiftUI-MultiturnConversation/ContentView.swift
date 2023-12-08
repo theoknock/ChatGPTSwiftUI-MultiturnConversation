@@ -15,7 +15,7 @@ struct PlainTextFieldStyle: TextFieldStyle {
 }
 
 class GlobalData: ObservableObject {
-    @Published var someGlobalData: String = "Initial Value"
+    @Published var someGlobalData: String = "Assistant ID"
 }
 
 struct ContentView: View {
@@ -27,13 +27,15 @@ struct ContentView: View {
             VStack {
                 // List VStack
                 List {
-                    TextField("Enter text", text: $globalData.someGlobalData)
-                                .padding()
+                    GroupBox(label: Text("ASSISTANT ID").font(.caption2), content: {
+                        TextField("", text: $globalData.someGlobalData)
+                    })
+                    
                     ForEach(1...100, id: \.self) {_ in
                         Section {
-                            ForEach(1...2, id: \.self) {_ in
-                                GroupBox(label: Text("Label"), content: {
-                                    /*@START_MENU_TOKEN@*/Text("Content")/*@END_MENU_TOKEN@*/
+                            ForEach(0...1, id: \.self) { index in
+                                GroupBox(label: Text((index == 0) ? "PROMPT" : "RESPONSE").font(.caption2), content: {
+                                    TextField("", text: .constant("Content"))
                                 })
                             }
                         }
