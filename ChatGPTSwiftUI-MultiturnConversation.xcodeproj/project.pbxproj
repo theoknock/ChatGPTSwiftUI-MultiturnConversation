@@ -16,7 +16,7 @@
 /* Begin PBXFileReference section */
 		B9EA3BF42B23431800186625 /* ChatGPTSwiftUI-MultiturnConversation.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ChatGPTSwiftUI-MultiturnConversation.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B9EA3BF72B23431800186625 /* ChatGPTSwiftUI_MultiturnConversationApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatGPTSwiftUI_MultiturnConversationApp.swift; sourceTree = "<group>"; };
-		B9EA3BF92B23431800186625 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		B9EA3BF92B23431800186625 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; wrapsLines = 0; };
 		B9EA3BFB2B23431900186625 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B9EA3BFE2B23431900186625 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
