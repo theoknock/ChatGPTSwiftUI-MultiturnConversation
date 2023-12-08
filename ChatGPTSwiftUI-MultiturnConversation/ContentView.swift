@@ -14,12 +14,25 @@ struct PlainTextFieldStyle: TextFieldStyle {
     }
 }
 
-class GlobalData: ObservableObject {
-    @Published var someGlobalData: String = "Assistant ID"
+class AssistantObject: ObservableObject {
+    @Published var id: String = "Assistant ID"
+}
+
+struct AssistantKey: Codable {
+    let id: String
+}
+
+class ThreadObject: ObservableObject {
+    @Published var id: String = "Thread ID"
+}
+
+struct ThreadKey: Codable {
+    let id: String
 }
 
 struct ContentView: View {
-    @ObservedObject var globalData = GlobalData()
+    @ObservedObject var assistantID = AssistantObject()
+    @ObservedObject var threadID = ThreadObject()
     
     var body: some View {
         VStack {
@@ -28,7 +41,8 @@ struct ContentView: View {
                 // List VStack
                 List {
                     GroupBox(label: Text("ASSISTANT ID").font(.caption2), content: {
-                        TextField("", text: $globalData.someGlobalData)
+                        TextField("", text: $assistantID.id)
+                        TextField("", text: $threadID.id)
                     })
                     
                     ForEach(1...100, id: \.self) {_ in
@@ -58,7 +72,8 @@ struct ContentView: View {
                     HStack {
                         Spacer()
                         Button("Button") {
-                            getAssistant(globalData: globalData)
+                            getAssistant(assistantID: assistantID)
+                            createThread(threadID: threadID)
                         }
                         .padding(.trailing)
                     }
@@ -72,11 +87,9 @@ struct ContentView: View {
     }
 }
 
-struct Assistant: Codable {
-    let id: String
-}
 
-func getAssistant(globalData: GlobalData) {
+
+func getAssistant(assistantID: AssistantObject) {
     let url = URL(string: "https://api.openai.com/v1/assistants")!
     var request = URLRequest(url: url)
     request.httpMethod = "POST"
@@ -106,7 +119,7 @@ func getAssistant(globalData: GlobalData) {
                         let id = assistant_response["id"] as? String
                     print("id:\t\(id ?? "")")
                     DispatchQueue.main.async {
-                        globalData.someGlobalData = id ?? "No ID"
+                        assistantID.id = id ?? "No ID"
                     }
                     print(assistant_response)
                 }
@@ -119,6 +132,50 @@ func getAssistant(globalData: GlobalData) {
     }
     
     task.resume()
+}
+
+func createThread(threadID: ThreadObject) {
+    let url = URL(string: "https://api.openai.com/v1/threads")!
+    var request = URLRequest(url: url)
+    request.httpMethod = "POST"
+    
+    request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+    request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
+    request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
+    request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
+    
+    let session = URLSession.shared
+    let task = session.dataTask(with: request) { (data, response, error) in
+        if error == nil && data != nil {
+            do {
+                if let thread_response = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any] {
+                        let id = thread_response["id"] as? String
+                    print("Thread id:\t\(id ?? "")")
+                    DispatchQueue.main.async {
+                        threadID.id = id ?? "No thread ID"
+                    }
+                    print(thread_response)
+                }
+            
+                
+            } catch {
+                print("Error")
+            }
+        }
+    }
+    
+    task.resume()
+    
+    // Response
+    //
+    /*
+     {
+       "id": "thread_abc123",
+       "object": "thread",
+       "created_at": 1698107661,
+       "metadata": {}
+     }
+     */
 }
 
 
