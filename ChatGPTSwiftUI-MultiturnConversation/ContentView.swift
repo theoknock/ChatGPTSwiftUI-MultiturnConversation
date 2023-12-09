@@ -72,7 +72,7 @@ struct ContentView_Previews: PreviewProvider {
 //    request.httpMethod = "POST"
 //
 //    request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-//    request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
+//    request.addValue("Bearer sk-", forHTTPHeaderField: "Authorization")
 //    request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
 //    request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
 //
@@ -115,7 +115,7 @@ struct ContentView_Previews: PreviewProvider {
 //    request.httpMethod = "POST"
 //
 //    request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-//    request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
+//    request.addValue("Bearer sk-", forHTTPHeaderField: "Authorization")
 //    request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
 //    request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
 //
@@ -153,7 +153,7 @@ struct ContentView_Previews: PreviewProvider {
 //    request.httpBody = jsonData
 //
 //    request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-//    request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
+//    request.addValue("Bearer sk-", forHTTPHeaderField: "Authorization")
 //    request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
 //    request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
 //
