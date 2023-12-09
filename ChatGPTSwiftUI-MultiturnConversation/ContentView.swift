@@ -124,7 +124,7 @@ func getAssistant(assistantID: AssistantObject) {
     request.httpMethod = "POST"
     
     request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-    request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
+    request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
     request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
     request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
     
@@ -167,7 +167,7 @@ func createThread(_ threadID: ThreadObject) -> String {
     request.httpMethod = "POST"
     
     request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-    request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
+    request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
     request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
     request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
     
@@ -205,7 +205,7 @@ func addMessage(message: String, threadID: ThreadObject) {
     request.httpBody = jsonData
     
     request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-    request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
+    request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
     request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
     request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
     
