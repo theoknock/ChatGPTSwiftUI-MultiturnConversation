@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import CryptoKit
 
 struct PlainTextFieldStyle: TextFieldStyle {
     func _body(configuration: TextField<Self._Label>) -> some View {
@@ -19,7 +20,7 @@ class AssistantObject: ObservableObject {
 }
 
 struct AssistantKey: Codable {
-    let id: String
+    var id: String
 }
 
 class ThreadObject: ObservableObject {
@@ -27,12 +28,36 @@ class ThreadObject: ObservableObject {
 }
 
 struct ThreadKey: Codable {
-    let id: String
+    var id: String
+}
+
+func sha256() -> String {
+    let hash = SHA256.hash(data: String(Date().timeIntervalSince1970).data(using: .utf8)!)
+    return hash.compactMap { String(format: "%02x", $0) }.joined()
+}
+
+enum MessageType {
+    case prompt
+    case response
+}
+
+struct Message: Identifiable, Equatable, Hashable {
+    let id: String = sha256()
+    let text: String
+    let type: MessageType
+}
+
+struct Completion: Identifiable, Equatable, Hashable {
+    var id: String          = sha256()
+    var date: String        = Date().description
+    var messages: [Message] = [Message]()
 }
 
 struct ContentView: View {
     @ObservedObject var assistantID = AssistantObject()
     @ObservedObject var threadID = ThreadObject()
+    
+    @State private var senderMessage: String = ""
     
     var body: some View {
         VStack {
@@ -40,9 +65,9 @@ struct ContentView: View {
             VStack {
                 // List VStack
                 List {
-                    GroupBox(label: Text("ASSISTANT ID").font(.caption2), content: {
-                        TextField("", text: $assistantID.id)
-                        TextField("", text: $threadID.id)
+                    GroupBox(label: Text("CHAT DATA").font(.caption2), content: {
+                        TextField("", text: $assistantID.id).font(.caption)
+                        TextField("", text: $threadID.id).font(.caption)
                     })
                     
                     ForEach(1...100, id: \.self) {_ in
@@ -55,6 +80,7 @@ struct ContentView: View {
                         }
                     }
                 }
+                .listStyle(.insetGrouped)
                 
                 
                 
@@ -64,7 +90,7 @@ struct ContentView: View {
         HStack {
             HStack {
                 ZStack(alignment: .trailing) {
-                    TextField("Placeholder", text: .constant(""))
+                    TextField("Placeholder", text: $senderMessage)
                         .padding(.all)
                         .background(Color(uiColor: UIColor.init(white: 1.0, alpha: 0.15)))
                         .foregroundColor(Color(uiColor: UIColor.lightText))
@@ -73,7 +99,10 @@ struct ContentView: View {
                         Spacer()
                         Button("Button") {
                             getAssistant(assistantID: assistantID)
-                            createThread(threadID: threadID)
+                            sleep(1)
+                            threadID.id = createThread(threadID)
+                            sleep(1)
+                            addMessage(message: senderMessage, threadID: threadID)
                         }
                         .padding(.trailing)
                     }
@@ -95,7 +124,7 @@ func getAssistant(assistantID: AssistantObject) {
     request.httpMethod = "POST"
     
     request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-    request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
+    request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
     request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
     request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
     
@@ -116,14 +145,12 @@ func getAssistant(assistantID: AssistantObject) {
         if error == nil && data != nil {
             do {
                 if let assistant_response = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any] {
-                        let id = assistant_response["id"] as? String
-                    print("id:\t\(id ?? "")")
+                    let id = assistant_response["id"] as? String
                     DispatchQueue.main.async {
                         assistantID.id = id ?? "No ID"
                     }
-                    print(assistant_response)
                 }
-            
+                
                 
             } catch {
                 print("Error")
@@ -134,13 +161,13 @@ func getAssistant(assistantID: AssistantObject) {
     task.resume()
 }
 
-func createThread(threadID: ThreadObject) {
+func createThread(_ threadID: ThreadObject) -> String {
     let url = URL(string: "https://api.openai.com/v1/threads")!
     var request = URLRequest(url: url)
     request.httpMethod = "POST"
     
     request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-    request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
+    request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
     request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
     request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
     
@@ -149,14 +176,12 @@ func createThread(threadID: ThreadObject) {
         if error == nil && data != nil {
             do {
                 if let thread_response = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any] {
-                        let id = thread_response["id"] as? String
-                    print("Thread id:\t\(id ?? "")")
+                    let id = thread_response["id"] as? String
                     DispatchQueue.main.async {
                         threadID.id = id ?? "No thread ID"
                     }
-                    print(thread_response)
                 }
-            
+                
                 
             } catch {
                 print("Error")
@@ -165,17 +190,39 @@ func createThread(threadID: ThreadObject) {
     }
     
     task.resume()
+    sleep(1)
+    return threadID.id
+}
+
+func addMessage(message: String, threadID: ThreadObject) {
+    let message_request: Dictionary = ["role": "user", "content": "\(message)"] as [String : Any]
     
-    // Response
-    //
-    /*
-     {
-       "id": "thread_abc123",
-       "object": "thread",
-       "created_at": 1698107661,
-       "metadata": {}
-     }
-     */
+    let url = URL(string: "https://api.openai.com/v1/threads/" + threadID.id + "/messages")!
+    var request = URLRequest(url: url)
+    request.httpMethod = "POST"
+    
+    let jsonData = try! JSONSerialization.data(withJSONObject: message_request, options: [])
+    request.httpBody = jsonData
+    
+    request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+    request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
+    request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
+    request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
+    
+    let session = URLSession.shared
+    let task = session.dataTask(with: request) { (data, response, error) in
+        if error == nil && data != nil {
+            do {
+                if let message_response = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any] {
+                    print("Message:\t\(message_response)")
+                }
+            } catch {
+                print("Error")
+            }
+        }
+    }
+    
+    task.resume()
 }
 
 
