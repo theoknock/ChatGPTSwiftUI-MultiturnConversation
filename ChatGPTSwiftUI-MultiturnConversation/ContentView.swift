@@ -11,6 +11,7 @@ import CryptoKit
 @MainActor class ChatData : ObservableObject {
     @Published var assistant_id: String = "assistant_id"
     @Published var thread_id: String = "thread_id"
+    @Published var run_id: String = "run_id"
 }
 
 struct AssistantKey: Codable {
@@ -18,6 +19,10 @@ struct AssistantKey: Codable {
 }
 
 struct ThreadKey: Codable {
+    var id: String
+}
+
+struct RunKey: Codable {
     var id: String
 }
 
@@ -64,111 +69,3 @@ struct ContentView_Previews: PreviewProvider {
             .preferredColorScheme(.dark)
     }
 }
-
-
-//func getAssistant(assistantID: String) {
-//    let url = URL(string: "https://api.openai.com/v1/assistants")!
-//    var request = URLRequest(url: url)
-//    request.httpMethod = "POST"
-//
-//    request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-//    request.addValue("Bearer sk-", forHTTPHeaderField: "Authorization")
-//    request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
-//    request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
-//
-//    let type: [Dictionary] = [["type": "code_interpreter"]]
-//    let assistant_request: Dictionary =
-//    [
-//        "instructions": "You are a personal math tutor. When asked a question, write and run Python code to answer the question.",
-//        "name": "Math Tutor",
-//        "tools": type,
-//        "model": "gpt-4"
-//    ] as [String : Any]
-//
-//    let jsonData = try! JSONSerialization.data(withJSONObject: assistant_request, options: [])
-//    request.httpBody = jsonData
-//
-//    let session = URLSession.shared
-//    let task = session.dataTask(with: request) { (data, response, error) in
-//        if error == nil && data != nil {
-//            do {
-//                if let assistant_response = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any] {
-//                    let id = assistant_response["id"] as? String
-//                    DispatchQueue.main.async {
-//                        assistant_id = id ?? "No ID"
-//                    }
-//                }
-//
-//
-//            } catch {
-//                print("Error")
-//            }
-//        }
-//    }
-//
-//    task.resume()
-//}
-//
-//func createThread(_ threadID: String) -> String {
-//    let url = URL(string: "https://api.openai.com/v1/threads")!
-//    var request = URLRequest(url: url)
-//    request.httpMethod = "POST"
-//
-//    request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-//    request.addValue("Bearer sk-", forHTTPHeaderField: "Authorization")
-//    request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
-//    request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
-//
-//    let session = URLSession.shared
-//    let task = session.dataTask(with: request) { (data, response, error) in
-//        if error == nil && data != nil {
-//            do {
-//                if let thread_response = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any] {
-//                    let id = thread_response["id"] as? String
-//                    DispatchQueue.main.async {
-//                        thread_id = id ?? "No thread ID"
-//                    }
-//                }
-//
-//
-//            } catch {
-//                print("Error")
-//            }
-//        }
-//    }
-//
-//    task.resume()
-//    sleep(1)
-//    return thread_id
-//}
-//
-//func addMessage(message: String, threadID: String) {
-//    let message_request: Dictionary = ["role": "user", "content": "\(message)"] as [String : Any]
-//
-//    let url = URL(string: "https://api.openai.com/v1/threads/" + thread_id + "/messages")!
-//    var request = URLRequest(url: url)
-//    request.httpMethod = "POST"
-//
-//    let jsonData = try! JSONSerialization.data(withJSONObject: message_request, options: [])
-//    request.httpBody = jsonData
-//
-//    request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-//    request.addValue("Bearer sk-", forHTTPHeaderField: "Authorization")
-//    request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
-//    request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
-//
-//    let session = URLSession.shared
-//    let task = session.dataTask(with: request) { (data, response, error) in
-//        if error == nil && data != nil {
-//            do {
-//                if let message_response = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any] {
-//                    print("Message:\t\(message_response)")
-//                }
-//            } catch {
-//                print("Error")
-//            }
-//        }
-//    }
-//
-//    task.resume()
-//}
