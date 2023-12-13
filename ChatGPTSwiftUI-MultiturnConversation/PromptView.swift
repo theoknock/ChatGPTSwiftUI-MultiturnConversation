@@ -23,7 +23,7 @@ struct PromptView: View {
             }
             HStack {
                 Button("", systemImage: "play") {
-                    assistant()
+                    addMessage(message: senderMessage)
                 }
                 .safeAreaPadding(.trailing)
                 .buttonStyle(.bordered)
@@ -31,16 +31,29 @@ struct PromptView: View {
             
         }
         .background(Color(uiColor: .quaternarySystemFill))
+        .task {
+            do {
+                try await assistant()
+            } catch {
+                print("Error")
+            }
+            
+            do {
+                try await thread()
+            } catch {
+                print("Error")
+            }
+        }
     }
     
-    func assistant() -> () {
+    func assistant() async throws -> () {
         let url = URL(string: "https://api.openai.com/v1/assistants")!
         //print(url)
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -57,17 +70,15 @@ struct PromptView: View {
         request.httpBody = jsonData
         
         let session = URLSession.shared
-        let task = session.dataTask(with: request) { (data, response, error) in
+        let task = try await session.dataTask(with: request) { (data, response, error) in
             if error == nil && data != nil {
                 do {
                     if let assistant_response = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any] {
                         //                        //print(assistant_response)
                         let id = assistant_response["id"] as? String
-                        DispatchQueue.main.async {
-                            chatData.assistant_id = id ?? "No ID"
-                            //print(assistant_response)
-                            thread()
-                        }
+                        chatData.assistant_id = id ?? "No ID"
+                        //print(assistant_response)
+                        
                     }
                     
                 } catch {
@@ -78,34 +89,31 @@ struct PromptView: View {
         task.resume()
     }
     
-    func thread() -> () {
+    func thread() async throws -> () {
         let url = URL(string: "https://api.openai.com/v1/threads")!
         //print(url)
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
         let session = URLSession.shared
-        let task = session.dataTask(with: request) { (data, response, error) in
+        let task = try await session.dataTask(with: request) { (data, response, error) in
             if error == nil && data != nil {
                 do {
                     if let thread_response = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any] {
                         let id = thread_response["id"] as? String
                         DispatchQueue.main.async {
                             chatData.thread_id = id ?? "No thread ID"
-                            addMessage(message: "Add 2 + 2")
-                            //                            fast(message: "hello")
-                            //print(thread_response)
                         }
                     }
                     
                     
                 } catch {
-                    //print("Error")
+                    print("Error")
                 }
             }
         }
@@ -125,7 +133,7 @@ struct PromptView: View {
         request.httpBody = jsonData
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -158,7 +166,7 @@ struct PromptView: View {
         request.httpMethod = "POST"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -195,7 +203,7 @@ struct PromptView: View {
         request.httpMethod = "GET"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -229,7 +237,7 @@ struct PromptView: View {
         request.httpMethod = "GET"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -320,7 +328,7 @@ struct PromptView: View {
         request.httpBody = jsonData
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
