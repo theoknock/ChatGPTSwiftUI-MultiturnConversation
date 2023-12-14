@@ -56,7 +56,7 @@ struct ContentView: View {
         VStack {
             ListView()
                 .border(/*@START_MENU_TOKEN@*/Color.white/*@END_MENU_TOKEN@*/, width: /*@START_MENU_TOKEN@*/1/*@END_MENU_TOKEN@*/)
-            PromptView()
+            PromptView(chatData: chatData)
                 .border(/*@START_MENU_TOKEN@*/Color.white/*@END_MENU_TOKEN@*/, width: /*@START_MENU_TOKEN@*/1/*@END_MENU_TOKEN@*/)
         }
         .environmentObject(chatData)

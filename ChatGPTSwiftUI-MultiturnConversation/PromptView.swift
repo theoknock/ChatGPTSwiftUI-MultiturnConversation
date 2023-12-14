@@ -10,7 +10,7 @@ import Foundation
 
 struct PromptView: View {
     @State private var senderMessage: String = ""
-    @EnvironmentObject var chatData : ChatData
+    @ObservedObject var chatData : ChatData
     
     var body: some View {
         HStack {
@@ -22,8 +22,10 @@ struct PromptView: View {
                     .textFieldStyle(.roundedBorder)
             }
             HStack {
-                Button("", systemImage: "play") {
-                    addMessage(message: senderMessage)
+                Button("Send") {
+                    Task {
+                        addMessage(message: senderMessage)
+                    }
                 }
                 .safeAreaPadding(.trailing)
                 .buttonStyle(.bordered)
@@ -32,22 +34,14 @@ struct PromptView: View {
         }
         .background(Color(uiColor: .quaternarySystemFill))
         .task {
-            do {
-                try await assistant()
-                do {
-                    try await thread()
-                } catch {
-                    print("Error")
-                }
-            } catch {
-                print("Error")
-            }
+            assistant()
+            thread()
         }
     }
     
-    func assistant() async throws -> () {
+    func assistant() {
         let url = URL(string: "https://api.openai.com/v1/assistants")!
-        //print(url)
+        ////print(url)
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         
@@ -69,28 +63,28 @@ struct PromptView: View {
         request.httpBody = jsonData
         
         let session = URLSession.shared
-        let task = try await session.dataTask(with: request) { (data, response, error) in
+        let task = session.dataTask(with: request) { (data, response, error) in
             if error == nil && data != nil {
-                do {
-                    if let assistant_response = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any] {
-                        //                        //print(assistant_response)
-                        let id = assistant_response["id"] as? String
-                        chatData.assistant_id = id ?? "No ID"
-                        //print(assistant_response)
+                DispatchQueue.main.async {
+                    do {
+                        if let assistant_response = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any] {
+                            let id = assistant_response["id"] as? String
+                            chatData.assistant_id = id ?? "No assistant ID"
+                            
+                        }
                         
+                    } catch {
+                        //print("Error")
                     }
-                    
-                } catch {
-                    //print("Error")
                 }
             }
         }
         task.resume()
     }
     
-    func thread() async throws -> () {
+    func thread() {
         let url = URL(string: "https://api.openai.com/v1/threads")!
-        //print(url)
+        ////print(url)
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         
@@ -100,19 +94,17 @@ struct PromptView: View {
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
         let session = URLSession.shared
-        let task = try await session.dataTask(with: request) { (data, response, error) in
+        let task = session.dataTask(with: request) { (data, response, error) in
             if error == nil && data != nil {
-                do {
-                    if let thread_response = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any] {
-                        let id = thread_response["id"] as? String
-                        DispatchQueue.main.async {
+                DispatchQueue.main.async {
+                    do {
+                        if let thread_response = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any] {
+                            let id = thread_response["id"] as? String
                             chatData.thread_id = id ?? "No thread ID"
                         }
+                    } catch {
+                        //print("Error")
                     }
-                    
-                    
-                } catch {
-                    print("Error")
                 }
             }
         }
@@ -124,7 +116,7 @@ struct PromptView: View {
         let message_request: Dictionary = ["role": "user", "content": message] as [String : Any]
         
         let url = URL(string: "https://api.openai.com/v1/threads/" + chatData.thread_id + "/messages")!
-        //print(url)
+        ////print(url)
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         
@@ -139,13 +131,14 @@ struct PromptView: View {
         let session = URLSession.shared
         let task = session.dataTask(with: request) { (data, response, error) in
             if error == nil && data != nil {
-                do {
-                    if let message_response = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any] {
-                        print(message_response)
-                        run()
+                DispatchQueue.main.async {
+                    do {
+                        if let message_response = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any] {
+                            run()
+                        }
+                    } catch {
+                        ////print("Error")
                     }
-                } catch {
-                    //print("Error")
                 }
             }
         }
@@ -157,7 +150,7 @@ struct PromptView: View {
         let run_request: Dictionary = ["assistant_id": chatData.assistant_id] as [String : Any]
         
         let url = URL(string: "https://api.openai.com/v1/threads/" + chatData.thread_id + "/runs")!
-        //print(url)
+        ////print(url)
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         
@@ -172,19 +165,18 @@ struct PromptView: View {
         let session = URLSession.shared
         let task = session.dataTask(with: request) { (data, response, error) in
             if error == nil && data != nil {
-                do {
-                    if let run_response = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any] {
-                        let id = run_response["id"] as? String
-                        DispatchQueue.main.async {
+                DispatchQueue.main.async {
+                    
+                    do {
+                        if let run_response = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any] {
+                            let id = run_response["id"] as? String
                             chatData.run_id = id ?? "No run ID"
-                            //print(run_response)
+                            ////print(run_response)
                             retrieve()
                         }
+                    } catch {
+                        ////print("Error")
                     }
-                    
-                    
-                } catch {
-                    //print("Error")
                 }
             }
         }
@@ -192,9 +184,9 @@ struct PromptView: View {
         task.resume()
     }
     
-    func retrieve() -> () {
+    func retrieve() {
         let url = URL(string: "https://api.openai.com/v1/threads/" + chatData.thread_id + "/runs/" + chatData.run_id)!
-        print(url)
+//        print(url)
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         
@@ -206,20 +198,21 @@ struct PromptView: View {
         let session = URLSession.shared
         let task = session.dataTask(with: request) { (data, response, error) in
             if error == nil && data != nil {
-                do {
-                    if let retrieve_response = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any] {
-                        let delayInSeconds = 5.0
-                        if (retrieve_response["status"] as? String) != "completed" {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + delayInSeconds) {
-                                print("\nList response:\t\(retrieve_response)\n")
-                                retrieve()
+                DispatchQueue.main.async {
+                    do {
+                        if let retrieve_response = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any] {
+                            if (retrieve_response["status"] as? String) != "completed" {
+                                //print("\nList response:\t\(retrieve_response)\n")
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: {
+                                    retrieve()
+                                })
+                            } else {
+                                list()
                             }
-                        } else {
-                            list()
                         }
+                    } catch {
+                        ////print("Error")
                     }
-                } catch {
-                    //print("Error")
                 }
             }
         }
@@ -227,9 +220,7 @@ struct PromptView: View {
         task.resume()
     }
     
-    /// <#Description#>
-    /// - Returns: <#description#>
-    func list() -> () {
+    func list() {
         let url = URL(string: "https://api.openai.com/v1/threads/" + chatData.thread_id + "/messages")!
         print(url)
         var request = URLRequest(url: url)
@@ -243,62 +234,33 @@ struct PromptView: View {
         let session = URLSession.shared
         let task = session.dataTask(with: request) { (data, response, error) in
             if error == nil && data != nil {
-                do {
-                    if let list_response: [String: Any] = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any] {
-                        let delayInSeconds = 5.0
-                        DispatchQueue.main.asyncAfter(deadline: .now() + delayInSeconds) {
-                            print("\nList response:\t\(list_response)\n")
-                            DispatchQueue.main.asyncAfter(deadline: .now() + delayInSeconds) {
-                                print("\nList response:\t\(list_response)\n")
+//                DispatchQueue.main.async {
+                    do {
+                        if let list_response: [String: Any] = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any] {
+                            if let dataArray = list_response["data"] as? [[String: Any]] {
+                                for dict in dataArray {
+                                    if let contentArray = dict["content"] as? [[String: Any]] {
+                                        for content in contentArray {
+                                            if let textArray = content["text"] as? [String: Any] {
+                                                print(textArray["value"])
+                                            }
+                                        }
+                                    }
+                                }
                             }
+
                         }
-                        
+                    } catch {
+                        ////print("Error")
                     }
-                    
-                    
-                } catch {
-                    //print("Error")
-                }
+//                }
             }
         }
         
         task.resume()
     }
     
-    func fast(message: String) -> () {
-        /*
-         https://api.openai.com/v1/threads/runs \
-         -H "Authorization: Bearer $OPENAI_API_KEY" \
-         -H "Content-Type: application/json" \
-         -H "OpenAI-Beta: assistants=v1" \
-         -d '{
-         "assistant_id": "asst_abc123",
-         "thread": {
-         "messages": [
-         {"role": "user", "content": "Explain deep learning to a 5 year old."}
-         ]
-         }
-         }'
-         */
-        
-        /*
-         var payload: [String: Any] = [
-         "model": "gpt-4",
-         "messages": [[String: Any]](),
-         "temperature": 1,
-         "max_tokens": 256,
-         "top_p": 1,
-         "frequency_penalty": 0,
-         "presence_penalty": 0
-         ]
-         var message_values: [String]
-         for message in messages {
-         let role = message.type == .prompt ? "user" : "assistant"
-         let messageDict = ["role": "\(role)", "content": "\(message.text)"]
-         //            payload.app/end(messageDict)
-         }
-         */
-        
+    func fast(message: String) {
         let assistant_dict: Dictionary = ["assistant_id": "\(chatData.assistant_id)"] as [String : Any]
         let message_dict: [Dictionary] = [["role": "user", "content": "\(message)"]]
         var messages_dict: Dictionary = ["messages": [Dictionary<String, Any>]()] as [String : Any]
@@ -316,10 +278,10 @@ struct PromptView: View {
         ]
         fast_request.updateValue("\(chatData.assistant_id)", forKey: "assistant_id")
         fast_request.updateValue(messages_dict, forKey: "thread")
-        //print(fast_request)
+        ////print(fast_request)
         
         let url = URL(string: "https://api.openai.com/v1/threads/" + chatData.thread_id + "/messages")!
-        //print(url)
+        ////print(url)
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         
@@ -336,22 +298,14 @@ struct PromptView: View {
             if error == nil && data != nil {
                 do {
                     if let message_response = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any] {
-                        //                        //print("Message:\t\(message_response)")
-                        //print(message_response)
                         list()
                     }
                 } catch {
-                    //print("Error")
+                    ////print("Error")
                 }
             }
         }
         
         task.resume()
     }
-}
-
-#Preview {
-    PromptView()
-        .preferredColorScheme(.dark)
-        .environmentObject(ChatData())
 }
