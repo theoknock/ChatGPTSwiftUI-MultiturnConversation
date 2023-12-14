@@ -46,7 +46,7 @@ struct PromptView: View {
         request.httpMethod = "POST"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -89,7 +89,7 @@ struct PromptView: View {
         request.httpMethod = "POST"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -124,7 +124,7 @@ struct PromptView: View {
         request.httpBody = jsonData
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -155,7 +155,7 @@ struct PromptView: View {
         request.httpMethod = "POST"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -191,7 +191,7 @@ struct PromptView: View {
         request.httpMethod = "GET"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -227,7 +227,7 @@ struct PromptView: View {
         request.httpMethod = "GET"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -237,20 +237,16 @@ struct PromptView: View {
                     do {
                         if let list_response: [String: Any] = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any] {
                             if let dataArray = list_response["data"] as? [[String: Any]] {
-//                                for dict in dataArray {
                                 if let contentArray = (dataArray.first)!["content"] as? [[String: Any]] {
-//                                        for content in contentArray {
-                                            if let textArray = (contentArray.first as? [String: Any])!["text"] as? [String: Any] {
+                                    if let textArray = (contentArray.first)!["text"] as? [String: Any] {
                                                 print(textArray["value"] as! String)
                                             }
-//                                        }
                                     }
-//                                }
                             }
 
                         }
                     } catch {
-                        ////print("Error")
+                        print("Error")
                     }
             }
         }
@@ -287,7 +283,7 @@ struct PromptView: View {
         request.httpBody = jsonData
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
