@@ -27,16 +27,14 @@ struct Message: Identifiable, Equatable, Hashable {
 }
 
 struct ContentView: View {
-//    @State private var senderMessage: String = ""
-//    @State private var receiverMessage: String = ""
     @StateObject var chatData = ChatData()
     
     var body: some View {
         VStack {
+            ChatView(chatData: chatData)
             ListView(chatData: chatData)
-                .border(/*@START_MENU_TOKEN@*/Color.white/*@END_MENU_TOKEN@*/, width: /*@START_MENU_TOKEN@*/1/*@END_MENU_TOKEN@*/)
             PromptView(chatData: chatData)
-                .border(/*@START_MENU_TOKEN@*/Color.white/*@END_MENU_TOKEN@*/, width: /*@START_MENU_TOKEN@*/1/*@END_MENU_TOKEN@*/)
+                .safeAreaPadding(.bottom)
         }
     }
 }

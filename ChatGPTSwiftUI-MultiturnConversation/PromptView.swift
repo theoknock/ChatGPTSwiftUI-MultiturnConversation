@@ -10,7 +10,6 @@ import Foundation
 
 struct PromptView: View {
     @State private var senderMessage: String = ""
-    @State private var receiverMessage: String = ""
     @State private var chatMessage: Message = Message(id: sha256(), prompt: "", response: "")
     
     @ObservedObject var chatData : ChatData
@@ -26,8 +25,9 @@ struct PromptView: View {
             HStack {
                 Button("Send") {
                     Task {
-                        addMessage(message: senderMessage)
+                        addMessage(message: senderMessage.trimmingCharacters(in: .whitespacesAndNewlines))
                         senderMessage = ""
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                     }
                 }
                 .safeAreaPadding(.trailing)
@@ -35,6 +35,7 @@ struct PromptView: View {
             }
             
         }
+        
         .background(Color(uiColor: .quaternarySystemFill))
         .task {
             assistant()
@@ -44,7 +45,6 @@ struct PromptView: View {
     
     func assistant() {
         let url = URL(string: "https://api.openai.com/v1/assistants")!
-        ////print(url)
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         
@@ -56,8 +56,8 @@ struct PromptView: View {
         let type: [Dictionary] = [["type": "code_interpreter"]]
         let assistant_request: Dictionary =
         [
-            "instructions": "You are a personal math tutor. When asked a question, write and run Python code to answer the question.",
-            "name": "Math Tutor",
+            "instructions": "You are a programming language expert. When asked to write code in any programming language, you will write the code first before you explain it.",
+            "name": "Code Expert",
             "tools": type,
             "model": "gpt-4"
         ] as [String : Any]
@@ -75,9 +75,8 @@ struct PromptView: View {
                             chatData.assistant_id = id ?? "No assistant ID"
                             
                         }
-                        
                     } catch {
-                        //print("Error")
+                        print("Error")
                     }
                 }
             }
@@ -87,7 +86,6 @@ struct PromptView: View {
     
     func thread() {
         let url = URL(string: "https://api.openai.com/v1/threads")!
-        ////print(url)
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         
@@ -106,21 +104,18 @@ struct PromptView: View {
                             chatData.thread_id = id ?? "No thread ID"
                         }
                     } catch {
-                        //print("Error")
+                        print("Error")
                     }
                 }
             }
         }
-        
         task.resume()
     }
     
     func addMessage(message: String) -> () {
-        // To-Do: Try replacing message: with senderMessage:
         let message_request: Dictionary = ["role": "user", "content": message] as [String : Any]
         
         let url = URL(string: "https://api.openai.com/v1/threads/" + chatData.thread_id + "/messages")!
-        print(url)
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         
@@ -141,7 +136,7 @@ struct PromptView: View {
                             if let contentArray = message_response["content"] as? [[String: Any]] {
                                     if let textArray = (contentArray.first)!["text"] as? [String: Any] {
                                         if let value = textArray["value"] as? String {
-                                            chatMessage = Message(id: sha256(), prompt: value, response: chatMessage.response)
+                                            chatData.messages.append(Message(id: sha256(), prompt: value, response: ""))
                                             run()
                                         }
                                     }
@@ -160,7 +155,6 @@ struct PromptView: View {
         let run_request: Dictionary = ["assistant_id": chatData.assistant_id] as [String : Any]
         
         let url = URL(string: "https://api.openai.com/v1/threads/" + chatData.thread_id + "/runs")!
-        //print(url)
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         
@@ -180,22 +174,19 @@ struct PromptView: View {
                         if let run_response = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any] {
                             let id = run_response["id"] as? String
                             chatData.run_id = id ?? "No run ID"
-                            ////print(run_response)
                             retrieve()
                         }
                     } catch {
-                        ////print("Error")
+                        print("Error")
                     }
                 }
             }
         }
-        
         task.resume()
     }
     
     func retrieve() {
         let url = URL(string: "https://api.openai.com/v1/threads/" + chatData.thread_id + "/runs/" + chatData.run_id)!
-        //        print(url)
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         
@@ -211,7 +202,9 @@ struct PromptView: View {
                     do {
                         if let retrieve_response = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any] {
                             if (retrieve_response["status"] as? String) != "completed" {
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: {
+                                chatData.messages[chatData.messages.count - 1].response = (retrieve_response["status"] as? String)!
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
+                                    chatData.messages[chatData.messages.count - 1].response = ""
                                     retrieve()
                                 })
                             } else {
@@ -219,7 +212,7 @@ struct PromptView: View {
                             }
                         }
                     } catch {
-                        ////print("Error")
+                        print("Error")
                     }
                 }
             }
@@ -229,7 +222,6 @@ struct PromptView: View {
     
     func list() {
         let url = URL(string: "https://api.openai.com/v1/threads/" + chatData.thread_id + "/messages")!
-        print(url)
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         
@@ -248,9 +240,7 @@ struct PromptView: View {
                                 if let contentArray = (dataArray.first)!["content"] as? [[String: Any]] {
                                     if let textArray = (contentArray.first)!["text"] as? [String: Any] {
                                         let value = textArray["value"] as! String
-                                        chatMessage.response = value
-                                        chatData.messages.append(chatMessage)
-                                        print(chatData.messages)
+                                        chatData.messages[chatData.messages.count - 1].response = value
                                     }
                                 }
                             }
