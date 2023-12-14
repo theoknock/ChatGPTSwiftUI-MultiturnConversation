@@ -234,26 +234,24 @@ struct PromptView: View {
         let session = URLSession.shared
         let task = session.dataTask(with: request) { (data, response, error) in
             if error == nil && data != nil {
-//                DispatchQueue.main.async {
                     do {
                         if let list_response: [String: Any] = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any] {
                             if let dataArray = list_response["data"] as? [[String: Any]] {
-                                for dict in dataArray {
-                                    if let contentArray = dict["content"] as? [[String: Any]] {
-                                        for content in contentArray {
-                                            if let textArray = content["text"] as? [String: Any] {
-                                                print(textArray["value"])
+//                                for dict in dataArray {
+                                if let contentArray = (dataArray.first)!["content"] as? [[String: Any]] {
+//                                        for content in contentArray {
+                                            if let textArray = (contentArray.first as? [String: Any])!["text"] as? [String: Any] {
+                                                print(textArray["value"] as! String)
                                             }
-                                        }
+//                                        }
                                     }
-                                }
+//                                }
                             }
 
                         }
                     } catch {
                         ////print("Error")
                     }
-//                }
             }
         }
         
