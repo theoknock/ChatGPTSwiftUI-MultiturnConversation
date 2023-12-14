@@ -12,18 +12,7 @@ import CryptoKit
     @Published var assistant_id: String = "assistant_id"
     @Published var thread_id: String = "thread_id"
     @Published var run_id: String = "run_id"
-}
-
-struct AssistantKey: Codable {
-    var id: String
-}
-
-struct ThreadKey: Codable {
-    var id: String
-}
-
-struct RunKey: Codable {
-    var id: String
+    @Published var messages: [Message] = [Message]()
 }
 
 func sha256() -> String {
@@ -31,35 +20,24 @@ func sha256() -> String {
     return hash.compactMap { String(format: "%02x", $0) }.joined()
 }
 
-enum MessageType {
-    case prompt
-    case response
-}
-
 struct Message: Identifiable, Equatable, Hashable {
-    let id: String = sha256()
-    let text: String
-    let type: MessageType
-}
-
-struct Completion: Identifiable, Equatable, Hashable {
-    var id: String          = sha256()
-    var date: String        = Date().description
-    var messages: [Message] = [Message]()
+    var id: String
+    var prompt: String
+    var response: String
 }
 
 struct ContentView: View {
-    @State private var senderMessage: String = ""
+//    @State private var senderMessage: String = ""
+//    @State private var receiverMessage: String = ""
     @StateObject var chatData = ChatData()
     
     var body: some View {
         VStack {
-            ListView()
+            ListView(chatData: chatData)
                 .border(/*@START_MENU_TOKEN@*/Color.white/*@END_MENU_TOKEN@*/, width: /*@START_MENU_TOKEN@*/1/*@END_MENU_TOKEN@*/)
             PromptView(chatData: chatData)
                 .border(/*@START_MENU_TOKEN@*/Color.white/*@END_MENU_TOKEN@*/, width: /*@START_MENU_TOKEN@*/1/*@END_MENU_TOKEN@*/)
         }
-        .environmentObject(chatData)
     }
 }
 
