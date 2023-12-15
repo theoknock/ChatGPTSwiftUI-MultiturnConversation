@@ -22,7 +22,7 @@ import CryptoKit
         request.httpMethod = "POST"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -62,7 +62,7 @@ import CryptoKit
         request.httpMethod = "POST"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -95,7 +95,7 @@ import CryptoKit
         request.httpBody = jsonData
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -131,7 +131,7 @@ import CryptoKit
         request.httpMethod = "POST"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -163,7 +163,7 @@ import CryptoKit
         request.httpMethod = "GET"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -198,7 +198,7 @@ import CryptoKit
         request.httpMethod = "GET"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -225,6 +225,50 @@ import CryptoKit
         }
         task.resume()
     }
+    
+    func save() {
+        let encoder = JSONEncoder()
+        do {
+            let jsonData = try encoder.encode(self.messages)
+            let fileURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("messages.json")
+
+            do {
+                try jsonData.write(to: fileURL)
+                print("File written to \(fileURL)")
+            } catch {
+                print("Error writing file: \(error)")
+            }
+
+        } catch {
+            print("Error encoding messages: \(error)")
+            return
+        }
+    }
+    
+    func load() {
+        let fileURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("messages.json")
+
+        let jsonData: Data
+        do {
+            jsonData = try Data(contentsOf: fileURL)
+        } catch {
+            print("Error reading file: \(error)")
+            return
+        }
+
+        let decoder = JSONDecoder()
+        do {
+            messages = try decoder.decode([Message].self, from: jsonData)
+        } catch {
+            print("Error decoding items: \(error)")
+            return
+        }
+
+        // Use the array of items
+        print(messages)
+    }
+
+    
 }
 
 func sha256() -> String {
@@ -232,15 +276,15 @@ func sha256() -> String {
     return hash.compactMap { String(format: "%02x", $0) }.joined()
 }
 
-struct Message: Identifiable, Equatable, Hashable {
+struct Message: Identifiable, Equatable, Hashable, Codable {
     var id: String
     var prompt: String
     var response: String
 }
 
 struct ContentView: View {
-    @StateObject var chatData = ChatData()
-    
+    @StateObject var chatData: ChatData = ChatData()
+
     var body: some View {
         VStack {
             ChatView(chatData: chatData)

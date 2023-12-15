@@ -23,26 +23,35 @@ struct ChatView: View {
             HStack {
                 Button(action: {
                     Task {
+                        chatData.save()
                         chatData.assistant()
                         chatData.thread()
                     }
                 }) {
-                    Image(systemName: "square.and.pencil")
-//                        .resizable()
+                    Image(systemName: "arrow.up.doc")
                         .aspectRatio(contentMode: .fit)
-//                        .frame(width: textHeight, height: textHeight, alignment: .center)
                         .symbolRenderingMode(.monochrome)
                         .fontWeight(.thin)
                         .foregroundStyle(Color.secondary)
                 }
                 .safeAreaPadding(.trailing)
                 .buttonStyle(.bordered)
-      
-//                .frame(height: 100, alignment: .center)
-//                Button("", systemImage: "square.and.pencil", action: {
-//                    
-//                })
-                      }
+            }
+            HStack {
+                Button(action: {
+                    Task {
+                        chatData.load()
+                    }
+                }) {
+                    Image(systemName: "arrow.down.doc")
+                        .aspectRatio(contentMode: .fit)
+                        .symbolRenderingMode(.monochrome)
+                        .fontWeight(.thin)
+                        .foregroundStyle(Color.secondary)
+                }
+                .safeAreaPadding(.trailing)
+                .buttonStyle(.bordered)
+            }
         }
         .background(Color(uiColor: .quaternarySystemFill))
         
@@ -54,6 +63,7 @@ struct ChatView: View {
         //        })
         //        .groupBoxStyle(.automatic)
     }
-
-        
+    
+    
+    
 }
