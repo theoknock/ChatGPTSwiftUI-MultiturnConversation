@@ -19,16 +19,18 @@ struct ListView: View {
                             Image(systemName: "questionmark.bubble")
                             Text(message.prompt)
                                 .font(.body)
+                                .foregroundStyle(Color.secondary)
                                 .lineLimit(nil)
                                 .fixedSize(horizontal: false, vertical: true)
                                 .padding()
                         }
                         .frame(maxWidth: .infinity, alignment: .topLeading)
-
+                        
                         HStack(alignment: .firstTextBaseline) {
                             Image(systemName: "exclamationmark.bubble")
                             Text(message.response)
                                 .font(.body)
+                                .foregroundStyle(Color.primary)
                                 .lineLimit(nil)
                                 .fixedSize(horizontal: false, vertical: true)
                                 .padding()
@@ -36,9 +38,9 @@ struct ListView: View {
                         .frame(maxWidth: .infinity, alignment: .topLeading)
                     }
                 }
+                .listRowSeparator(.hidden)
             }
         }
-        .listStyle(.grouped)
-        .listRowSeparator(.visible)
+        .listStyle(.sidebar)
     }
 }

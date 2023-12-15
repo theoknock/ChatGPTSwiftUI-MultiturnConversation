@@ -10,6 +10,7 @@
 		B92A75F22B24B06E0059C787 /* ListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B92A75F12B24B06E0059C787 /* ListView.swift */; };
 		B92A75F42B24B18F0059C787 /* PromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B92A75F32B24B18F0059C787 /* PromptView.swift */; };
 		B97F2D2F2B2AB34A00053102 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B97F2D2E2B2AB34A00053102 /* ChatView.swift */; };
+		B9C833082B2BB0B400BFB537 /* Algorithms in Frameworks */ = {isa = PBXBuildFile; productRef = B9C833072B2BB0B400BFB537 /* Algorithms */; };
 		B9EA3BF82B23431800186625 /* ChatGPTSwiftUI_MultiturnConversationApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9EA3BF72B23431800186625 /* ChatGPTSwiftUI_MultiturnConversationApp.swift */; };
 		B9EA3BFA2B23431800186625 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9EA3BF92B23431800186625 /* ContentView.swift */; };
 		B9EA3BFC2B23431900186625 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B9EA3BFB2B23431900186625 /* Assets.xcassets */; };
@@ -33,6 +34,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B9C833082B2BB0B400BFB537 /* Algorithms in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -94,6 +96,9 @@
 			dependencies = (
 			);
 			name = "ChatGPTSwiftUI-MultiturnConversation";
+			packageProductDependencies = (
+				B9C833072B2BB0B400BFB537 /* Algorithms */,
+			);
 			productName = "ChatGPTSwiftUI-MultiturnConversation";
 			productReference = B9EA3BF42B23431800186625 /* ChatGPTSwiftUI-MultiturnConversation.app */;
 			productType = "com.apple.product-type.application";
@@ -122,6 +127,9 @@
 				Base,
 			);
 			mainGroup = B9EA3BEB2B23431800186625;
+			packageReferences = (
+				B9C833062B2BB0B400BFB537 /* XCRemoteSwiftPackageReference "swift-algorithms" */,
+			);
 			productRefGroup = B9EA3BF52B23431800186625 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -358,6 +366,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		B9C833062B2BB0B400BFB537 /* XCRemoteSwiftPackageReference "swift-algorithms" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-algorithms.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.2.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		B9C833072B2BB0B400BFB537 /* Algorithms */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B9C833062B2BB0B400BFB537 /* XCRemoteSwiftPackageReference "swift-algorithms" */;
+			productName = Algorithms;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = B9EA3BEC2B23431800186625 /* Project object */;
 }
