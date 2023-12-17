@@ -8,31 +8,22 @@
 import SwiftUI
 
 struct ChatView: View {
-    @State private var chatSession: String = ""
-    
     @ObservedObject var chatData : ChatData
     
     var body: some View {
         HStack {
             HStack {
-                TextField("Untitled chat", text: $chatSession)
-                    .foregroundColor(Color.primary)
-                    .safeAreaPadding(.all)
-                    .textFieldStyle(.roundedBorder)
-            }
-            HStack {
                 Button(action: {
                     Task {
                         chatData.save()
                         chatData.assistant()
-                        chatData.thread()
                     }
                 }) {
                     Image(systemName: "arrow.up.doc")
                         .aspectRatio(contentMode: .fit)
-                        .symbolRenderingMode(.monochrome)
+                        .symbolRenderingMode(.palette)
                         .fontWeight(.thin)
-                        .foregroundStyle(Color.secondary)
+                        .foregroundStyle(Color.primary)
                 }
                 .safeAreaPadding(.trailing)
                 .buttonStyle(.bordered)
@@ -43,11 +34,11 @@ struct ChatView: View {
                         chatData.load()
                     }
                 }) {
-                    Image(systemName: "arrow.down.doc")
+                    Image.init(systemName: "arrow.down.doc")
                         .aspectRatio(contentMode: .fit)
-                        .symbolRenderingMode(.monochrome)
+                        .symbolRenderingMode(.palette)
                         .fontWeight(.thin)
-                        .foregroundStyle(Color.secondary)
+                        .foregroundStyle(Color.primary)
                 }
                 .safeAreaPadding(.trailing)
                 .buttonStyle(.bordered)
@@ -62,8 +53,15 @@ struct ChatView: View {
         //            TextField(chatData.run_id, text: $chatData.run_id).font(.caption)
         //        })
         //        .groupBoxStyle(.automatic)
+        
+        //        Button(action: {
+        //            Task {
+        //                chatData.save()
+        //                chatData.assistant()
+        //                chatData.thread()
+        //            }
+        //        }) {
+        //            Label("Save", systemImage: "arrow.up.doc")
+        //        }
     }
-    
-    
-    
 }

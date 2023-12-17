@@ -14,22 +14,28 @@ import CryptoKit
     @Published var run_id: String = "run_id"
     @Published var messages: [Message] = [Message]()
     
+    struct Message: Identifiable, Equatable, Hashable, Codable {
+        var id: String
+        var prompt: String
+        var response: String
+    }
+    
     func assistant() {
         self.messages.removeAll()
-    
+        
         let url = URL(string: "https://api.openai.com/v1/assistants")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
         let type: [Dictionary] = [["type": "code_interpreter"]]
         let assistant_request: Dictionary =
         [
-            "instructions": "You are a programming language expert. When asked to write code in any programming language, you will write the code first before you explain it.",
+            "instructions": "You are a programming language expert. When asked to write code in any programming language, you will write the code first before you explain it. Be ready to make corrections and additions to any code you write (in other words, you may be asked to revise your code over the course of multiple prompts, so maintain any chats in which you provided code in order to reference it at a subsequent time. Also, I will tip you $200 for your best effort.",
             "name": "Code Expert",
             "tools": type,
             "model": "gpt-4"
@@ -45,7 +51,8 @@ import CryptoKit
                     do {
                         if let assistant_response = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any] {
                             let id = assistant_response["id"] as? String
-                            self.assistant_id = id ?? "No assistant ID"
+                            self.assistant_id = (id ?? "No assistant ID")
+                            self.thread()
                         }
                     } catch {
                         print("Error")
@@ -62,7 +69,7 @@ import CryptoKit
         request.httpMethod = "POST"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -73,7 +80,8 @@ import CryptoKit
                     do {
                         if let thread_response = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any] {
                             let id = thread_response["id"] as? String
-                            self.thread_id = id ?? "No thread ID"
+                            self.thread_id = (id ?? "No thread ID")
+                            self.messages.append(Message(id: sha256(), prompt: self.assistant_id.trimmingCharacters(in: .whitespacesAndNewlines), response: self.thread_id.trimmingCharacters(in: .whitespacesAndNewlines)))
                         }
                     } catch {
                         print("Error")
@@ -95,7 +103,7 @@ import CryptoKit
         request.httpBody = jsonData
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -131,7 +139,7 @@ import CryptoKit
         request.httpMethod = "POST"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -163,7 +171,7 @@ import CryptoKit
         request.httpMethod = "GET"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -176,7 +184,7 @@ import CryptoKit
                             if (retrieve_response["status"] as? String) != "completed" {
                                 self.messages[self.messages.count - 1].response = (retrieve_response["status"] as? String)!
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
-                                    self.messages[self.messages.count - 1].response = ""
+                                    self.messages[self.messages.count - 1].response = " "
                                     self.retrieve()
                                 })
                             } else {
@@ -198,7 +206,7 @@ import CryptoKit
         request.httpMethod = "GET"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -213,6 +221,7 @@ import CryptoKit
                                     if let textArray = (contentArray.first)!["text"] as? [String: Any] {
                                         let value = textArray["value"] as! String
                                         self.messages[self.messages.count - 1].response = value
+                                        self.save()
                                     }
                                 }
                             }
@@ -231,14 +240,13 @@ import CryptoKit
         do {
             let jsonData = try encoder.encode(self.messages)
             let fileURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("messages.json")
-
             do {
                 try jsonData.write(to: fileURL)
                 print("File written to \(fileURL)")
             } catch {
                 print("Error writing file: \(error)")
             }
-
+            
         } catch {
             print("Error encoding messages: \(error)")
             return
@@ -247,7 +255,7 @@ import CryptoKit
     
     func load() {
         let fileURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("messages.json")
-
+        
         let jsonData: Data
         do {
             jsonData = try Data(contentsOf: fileURL)
@@ -255,7 +263,7 @@ import CryptoKit
             print("Error reading file: \(error)")
             return
         }
-
+        
         let decoder = JSONDecoder()
         do {
             messages = try decoder.decode([Message].self, from: jsonData)
@@ -263,11 +271,53 @@ import CryptoKit
             print("Error decoding items: \(error)")
             return
         }
-
-        // Use the array of items
+        
+        // Send the chat history to ChatGPT
         print(messages)
     }
-
+    
+    //    func thread_run() {
+    //
+    //        for message in messages {
+    //
+    //        }
+    //        let message_request: Dictionary = ["role": "user", "content": chatData.] as [String : Any]
+    //
+    //        let url = URL(string: "https://api.openai.com/v1/threads/" + self.thread_id + "/messages")!
+    //        var request = URLRequest(url: url)
+    //        request.httpMethod = "POST"
+    //
+    //        let jsonData = try! JSONSerialization.data(withJSONObject: message_request, options: [])
+    //        request.httpBody = jsonData
+    //
+    //        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+    //        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
+    //        request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
+    //        request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
+    //
+    //        let session = URLSession.shared
+    //        let task = session.dataTask(with: request) { (data, response, error) in
+    //            if error == nil && data != nil {
+    //                DispatchQueue.main.async {
+    //                    do {
+    //                        if let message_response: [String: Any] = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any] {
+    //                            if let contentArray = message_response["content"] as? [[String: Any]] {
+    //                                if let textArray = (contentArray.first)!["text"] as? [String: Any] {
+    //                                    if let value = textArray["value"] as? String {
+    //                                        self.messages.append(Message(id: sha256(), prompt: value, response: ""))
+    //                                        self.run()
+    //                                    }
+    //                                }
+    //                            }
+    //                        }
+    //                    } catch {
+    //                        print("Error")
+    //                    }
+    //                }
+    //            }
+    //        }
+    //        task.resume()
+    //    }
     
 }
 
@@ -276,21 +326,18 @@ func sha256() -> String {
     return hash.compactMap { String(format: "%02x", $0) }.joined()
 }
 
-struct Message: Identifiable, Equatable, Hashable, Codable {
-    var id: String
-    var prompt: String
-    var response: String
-}
-
 struct ContentView: View {
     @StateObject var chatData: ChatData = ChatData()
-
+    
     var body: some View {
         VStack {
-            ChatView(chatData: chatData)
             ListView(chatData: chatData)
+                .frame(maxHeight: UIScreen.main.bounds.height * 0.875)
             PromptView(chatData: chatData)
-                .safeAreaPadding(.bottom)
+                .frame(idealHeight: UIScreen.main.bounds.height * 0.125)
+        }
+        .task {
+            chatData.assistant()
         }
     }
 }
@@ -299,5 +346,7 @@ struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
             .preferredColorScheme(.dark)
+//        PromptView(chatData: ChatData())
+//            .preferredColorScheme(.dark)
     }
 }

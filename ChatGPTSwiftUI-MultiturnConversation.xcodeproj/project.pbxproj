@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		B92A75F22B24B06E0059C787 /* ListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B92A75F12B24B06E0059C787 /* ListView.swift */; };
 		B92A75F42B24B18F0059C787 /* PromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B92A75F32B24B18F0059C787 /* PromptView.swift */; };
+		B95143492B2CAF4A00C43A89 /* Chat.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95143482B2CAF4A00C43A89 /* Chat.swift */; };
 		B97F2D2F2B2AB34A00053102 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B97F2D2E2B2AB34A00053102 /* ChatView.swift */; };
 		B9C833082B2BB0B400BFB537 /* Algorithms in Frameworks */ = {isa = PBXBuildFile; productRef = B9C833072B2BB0B400BFB537 /* Algorithms */; };
 		B9EA3BF82B23431800186625 /* ChatGPTSwiftUI_MultiturnConversationApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9EA3BF72B23431800186625 /* ChatGPTSwiftUI_MultiturnConversationApp.swift */; };
@@ -19,7 +20,8 @@
 
 /* Begin PBXFileReference section */
 		B92A75F12B24B06E0059C787 /* ListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListView.swift; sourceTree = "<group>"; };
-		B92A75F32B24B18F0059C787 /* PromptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptView.swift; sourceTree = "<group>"; };
+		B92A75F32B24B18F0059C787 /* PromptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptView.swift; sourceTree = "<group>"; wrapsLines = 0; };
+		B95143482B2CAF4A00C43A89 /* Chat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chat.swift; sourceTree = "<group>"; };
 		B97F2D2D2B2A9B7B00053102 /* CodeCemetary.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CodeCemetary.md; sourceTree = "<group>"; };
 		B97F2D2E2B2AB34A00053102 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
 		B9EA3BF42B23431800186625 /* ChatGPTSwiftUI-MultiturnConversation.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ChatGPTSwiftUI-MultiturnConversation.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -61,6 +63,7 @@
 			isa = PBXGroup;
 			children = (
 				B9EA3BF72B23431800186625 /* ChatGPTSwiftUI_MultiturnConversationApp.swift */,
+				B95143482B2CAF4A00C43A89 /* Chat.swift */,
 				B97F2D2E2B2AB34A00053102 /* ChatView.swift */,
 				B92A75F12B24B06E0059C787 /* ListView.swift */,
 				B9EA3BF92B23431800186625 /* ContentView.swift */,
@@ -160,6 +163,7 @@
 				B9EA3BFA2B23431800186625 /* ContentView.swift in Sources */,
 				B97F2D2F2B2AB34A00053102 /* ChatView.swift in Sources */,
 				B92A75F42B24B18F0059C787 /* PromptView.swift in Sources */,
+				B95143492B2CAF4A00C43A89 /* Chat.swift in Sources */,
 				B9EA3BF82B23431800186625 /* ChatGPTSwiftUI_MultiturnConversationApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
