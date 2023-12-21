@@ -28,7 +28,7 @@ import CryptoKit
         request.httpMethod = "POST"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -51,11 +51,24 @@ import CryptoKit
                     do {
                         if let assistant_response = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any] {
                             let id = assistant_response["id"] as? String
-                            self.assistant_id = (id ?? "No assistant ID")
-                            self.thread()
+                            self.assistant_id = {
+                                defer { self.thread() }
+                                return id
+                            }() ?? {
+                                if let err = (assistant_response)["error"] as? [String: Any] {
+                                    if let err_msg = err["message"] as? String {
+                                        self.messages.append(Message(id: sha256(), prompt: "Error in thread", response: err_msg))
+                                    }
+                                }
+                                return ""
+                            }()
+                            
+                            //                            let id = assistant_response["id"] as? String
+                            //                            self.assistant_id = (id ?? "No assistant ID")
+                            //                            self.thread()
                         }
                     } catch {
-                        print("Error")
+                        self.messages.append(Message(id: sha256(), prompt: "Error in assistant", response: error.localizedDescription))
                     }
                 }
             }
@@ -69,7 +82,7 @@ import CryptoKit
         request.httpMethod = "POST"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -80,11 +93,18 @@ import CryptoKit
                     do {
                         if let thread_response = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any] {
                             let id = thread_response["id"] as? String
-                            self.thread_id = (id ?? "No thread ID")
+                            self.thread_id = (id ?? {
+                                if let err = (thread_response)["error"] as? [String: Any] {
+                                    if let err_msg = err["message"] as? String {
+                                        self.messages.append(Message(id: sha256(), prompt: "Error in thread", response: err_msg))
+                                    }
+                                }
+                                return ""
+                            }())
                             self.messages.append(Message(id: sha256(), prompt: self.assistant_id.trimmingCharacters(in: .whitespacesAndNewlines), response: self.thread_id.trimmingCharacters(in: .whitespacesAndNewlines)))
                         }
                     } catch {
-                        print("Error")
+                        self.messages.append(Message(id: sha256(), prompt: "Error in thread", response: error.localizedDescription))
                     }
                 }
             }
@@ -94,6 +114,7 @@ import CryptoKit
     
     func addMessage(message: String) -> () {
         let message_request: Dictionary = ["role": "user", "content": message] as [String : Any]
+        //        var message_request: Dictionary = ["role": "user", "content": message, "stream": true] as [String : Any]
         
         let url = URL(string: "https://api.openai.com/v1/threads/" + self.thread_id + "/messages")!
         var request = URLRequest(url: url)
@@ -103,7 +124,7 @@ import CryptoKit
         request.httpBody = jsonData
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -139,7 +160,7 @@ import CryptoKit
         request.httpMethod = "POST"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -171,7 +192,7 @@ import CryptoKit
         request.httpMethod = "GET"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -206,7 +227,7 @@ import CryptoKit
         request.httpMethod = "GET"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -291,7 +312,7 @@ import CryptoKit
     //        request.httpBody = jsonData
     //
     //        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-    //        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
+    //        request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
     //        request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
     //        request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
     //
@@ -346,7 +367,7 @@ struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
             .preferredColorScheme(.dark)
-//        PromptView(chatData: ChatData())
-//            .preferredColorScheme(.dark)
+        //        PromptView(chatData: ChatData())
+        //            .preferredColorScheme(.dark)
     }
 }
