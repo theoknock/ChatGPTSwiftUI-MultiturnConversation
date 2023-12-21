@@ -20,6 +20,7 @@ struct PromptView: View {
                 .textFieldStyle(.roundedBorder)
                 .lineLimit(3)
                 .padding(.leading)
+                .submitLabel(.send)
             
             Button(action: {
                 Task {

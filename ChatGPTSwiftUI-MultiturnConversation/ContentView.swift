@@ -7,6 +7,7 @@
 
 import SwiftUI
 import CryptoKit
+import SwiftData
 
 @MainActor class ChatData : ObservableObject {
     @Published var assistant_id: String = "assistant_id"
@@ -18,7 +19,14 @@ import CryptoKit
         var id: String
         var prompt: String
         var response: String
+        
+        init(id: String, prompt: String, response: String) {
+            self.id = sha256()
+            self.prompt = prompt
+            self.response = response
+        }
     }
+    
     
     func assistant() {
         self.messages.removeAll()
@@ -336,6 +344,8 @@ import CryptoKit
     
 }
 
+
+
 func sha256() -> String {
     let hash = SHA256.hash(data: String(Date().timeIntervalSince1970).data(using: .utf8)!)
     return hash.compactMap { String(format: "%02x", $0) }.joined()
@@ -343,7 +353,101 @@ func sha256() -> String {
 
 struct ContentView: View {
     @StateObject var chatData: ChatData = ChatData()
+    @Query var chatModels: [ChatModel]
     
+    @Environment(\.modelContext) private var modelContext
+    @Query private var items: [Item]
+    
+    var body: some View {
+        NavigationSplitView {
+            List {
+                ForEach(items) { item in
+                    NavigationLink {
+                        VStack {
+                            Text("Chat \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
+                            MainView(chatData: chatData)
+                        }
+                    } label: {
+//                        MainView(chatData: chatData)
+                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
+                    }
+                }
+                .onDelete(perform: deleteItems)
+            }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    EditButton()
+                }
+                ToolbarItem {
+                    Button(action: addItem) {
+                        Label("New Chat", systemImage: "plus")
+                    }
+                }
+            }
+        } detail: {
+            Text("Select an item")
+        }
+    }
+    
+    //        .navigationTitle("Chats")
+    //        .toolbar {
+    //            Button("Save chat", action: saveChat)
+    //        }
+    
+    //            List {
+    //                ForEach(chatModels) { chatModel in
+    //                    VStack(alignment: .leading, content: {
+    //                        Text(chatModel.id)
+    //                    })
+    //                }
+    //            }
+    //        NavigationStack {
+    //            VStack(alignment: .leading) {
+    //                NavigationLink(destination: MainView(chatData: chatData)) {
+    //                    Text("New chat")
+    //                        .frame(maxWidth: .infinity, alignment: .leading)
+    //                }
+    //                Spacer() // Pushes the content to the top
+    //            }
+    //            .navigationTitle("Chats")
+    //            .navigationBarTitleDisplayMode(.inline) // Optional: Makes the title smaller
+    //            .task {
+    //                chatData.assistant() // Assuming this is a method in ChatData
+    //            }
+    //        }
+    
+    
+    //        .toolbar(content: {
+    //            Button(action: /*@START_MENU_TOKEN@*/{}/*@END_MENU_TOKEN@*/, label: {
+    //                Text("Button")
+    //            })
+    //        })
+    
+    private func addItem() {
+        withAnimation {
+            let newItem = Item(timestamp: Date())
+            modelContext.insert(newItem)
+        }
+    }
+    
+    private func deleteItems(offsets: IndexSet) {
+        withAnimation {
+            for index in offsets {
+                modelContext.delete(items[index])
+            }
+        }
+    }
+    
+}
+
+struct MainView: View {
+    @ObservedObject var chatData : ChatData
+    
+    
+    init(chatData: ChatData) {
+        self.chatData = chatData
+        //            chatData.assistant()
+    }
     var body: some View {
         VStack {
             ListView(chatData: chatData)
@@ -351,17 +455,29 @@ struct ContentView: View {
             PromptView(chatData: chatData)
                 .frame(idealHeight: UIScreen.main.bounds.height * 0.125)
         }
-        .task {
-            chatData.assistant()
-        }
+        //            .task {
+        //                chatData.assistant()
+        //            }
     }
+    
 }
+
+
+
+//    func saveChat() {
+//        let id = ChatModel(id: chatData.messages.last!.id)
+//        let prompt = ChatModel(id: chatData.messages.last!.prompt)
+//        let response = ChatModel(id: chatData.messages.last!.response)
+//
+//        modelContext.insert(id)
+//        modelContext.insert(prompt)
+//        modelContext.insert(response)
+//    }
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
             .preferredColorScheme(.dark)
-        //        PromptView(chatData: ChatData())
-        //            .preferredColorScheme(.dark)
+            .modelContainer(for: Item.self, inMemory: true)
     }
 }
