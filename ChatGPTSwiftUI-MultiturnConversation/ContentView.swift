@@ -28,7 +28,7 @@ import CryptoKit
         request.httpMethod = "POST"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer Bearer ", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -55,20 +55,14 @@ import CryptoKit
                                 defer { self.thread() }
                                 return id
                             }() ?? {
-                                if let err = (assistant_response)["error"] as? [String: Any] {
-                                    if let err_msg = err["message"] as? String {
-                                        self.messages.append(Message(id: sha256(), prompt: "Error in thread", response: err_msg))
-                                    }
-                                }
-                                return ""
+                                let err = (assistant_response)["error"] as? [String: Any]
+                                let err_msg = err!["message"] as? String
+                                self.messages.append(Message(id: sha256(), prompt: "Error getting assistant", response: err_msg!))
+                                return err_msg!
                             }()
-                            
-                            //                            let id = assistant_response["id"] as? String
-                            //                            self.assistant_id = (id ?? "No assistant ID")
-                            //                            self.thread()
                         }
                     } catch {
-                        self.messages.append(Message(id: sha256(), prompt: "Error in assistant", response: error.localizedDescription))
+                        self.messages.append(Message(id: sha256(), prompt: "Error getting assistant", response: error.localizedDescription))
                     }
                 }
             }
@@ -82,7 +76,7 @@ import CryptoKit
         request.httpMethod = "POST"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer Bearer ", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -124,7 +118,7 @@ import CryptoKit
         request.httpBody = jsonData
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer Bearer ", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -160,7 +154,7 @@ import CryptoKit
         request.httpMethod = "POST"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer Bearer ", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -192,7 +186,7 @@ import CryptoKit
         request.httpMethod = "GET"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer Bearer ", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -227,7 +221,7 @@ import CryptoKit
         request.httpMethod = "GET"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer Bearer ", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
