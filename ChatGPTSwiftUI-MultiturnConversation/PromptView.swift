@@ -19,6 +19,7 @@ struct PromptView: View {
                 .foregroundColor(Color.primary)
                 .textFieldStyle(.roundedBorder)
                 .lineLimit(3)
+                .padding(.leading)
             
             Button(action: {
                 Task {
@@ -33,6 +34,7 @@ struct PromptView: View {
                     .foregroundStyle(Color.primary)
             }
             .buttonStyle(.plain)
+            .padding(.trailing)
         }
         .padding(.bottom)
     }

@@ -15,7 +15,7 @@ struct ChatView: View {
             HStack {
                 Button(action: {
                     Task {
-                        chatData.save()
+//                        chatData.save()
                         chatData.assistant()
                     }
                 }) {
@@ -31,7 +31,7 @@ struct ChatView: View {
             HStack {
                 Button(action: {
                     Task {
-                        chatData.load()
+//                        chatData.load()
                     }
                 }) {
                     Image.init(systemName: "arrow.down.doc")

@@ -28,7 +28,7 @@ import CryptoKit
         request.httpMethod = "POST"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer Bearer ", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -53,7 +53,7 @@ import CryptoKit
                             let id = assistant_response["id"] as? String
                             self.assistant_id = {
                                 defer { self.thread() }
-                                return id
+                                return id!.trimmingCharacters(in: .whitespacesAndNewlines)
                             }() ?? {
                                 let err = (assistant_response)["error"] as? [String: Any]
                                 let err_msg = err!["message"] as? String
@@ -76,7 +76,7 @@ import CryptoKit
         request.httpMethod = "POST"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer Bearer ", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -108,7 +108,6 @@ import CryptoKit
     
     func addMessage(message: String) -> () {
         let message_request: Dictionary = ["role": "user", "content": message] as [String : Any]
-        //        var message_request: Dictionary = ["role": "user", "content": message, "stream": true] as [String : Any]
         
         let url = URL(string: "https://api.openai.com/v1/threads/" + self.thread_id + "/messages")!
         var request = URLRequest(url: url)
@@ -118,7 +117,7 @@ import CryptoKit
         request.httpBody = jsonData
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer Bearer ", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -131,6 +130,7 @@ import CryptoKit
                             if let contentArray = message_response["content"] as? [[String: Any]] {
                                 if let textArray = (contentArray.first)!["text"] as? [String: Any] {
                                     if let value = textArray["value"] as? String {
+                                        print(error)
                                         self.messages.append(Message(id: sha256(), prompt: value, response: ""))
                                         self.run()
                                     }
@@ -154,7 +154,7 @@ import CryptoKit
         request.httpMethod = "POST"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer Bearer ", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -186,7 +186,7 @@ import CryptoKit
         request.httpMethod = "GET"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer Bearer ", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -221,7 +221,7 @@ import CryptoKit
         request.httpMethod = "GET"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer Bearer ", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         

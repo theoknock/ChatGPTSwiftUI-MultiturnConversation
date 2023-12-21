@@ -12,31 +12,31 @@ struct ListView: View {
     
     var body: some View {
         List {
-            Section {
-                VStack(alignment: .leading) {
-                    HStack(alignment: .firstTextBaseline) {
-                        Image(systemName: "questionmark.bubble")
-                        Text("message.prompt")
-                            .font(.body)
-                            .foregroundStyle(Color.secondary)
-                            .lineLimit(nil)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .padding(.bottom)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .topLeading)
-                    
-                    HStack(alignment: .firstTextBaseline) {
-                        Image(systemName: "exclamationmark.bubble")
-                        Text("message.response")
-                            .font(.body)
-                            .foregroundStyle(Color.primary)
-                            .lineLimit(nil)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .topLeading)
-                }
-            }
-            .listRowSeparator(.hidden)
+//            Section {
+//                VStack(alignment: .leading) {
+//                    HStack(alignment: .firstTextBaseline) {
+//                        Image(systemName: "questionmark.bubble")
+//                        Text("message.prompt")
+//                            .font(.body)
+//                            .foregroundStyle(Color.secondary)
+//                            .lineLimit(nil)
+//                            .fixedSize(horizontal: false, vertical: true)
+//                            .padding(.bottom)
+//                    }
+//                    .frame(maxWidth: .infinity, alignment: .topLeading)
+//                    
+//                    HStack(alignment: .firstTextBaseline) {
+//                        Image(systemName: "exclamationmark.bubble")
+//                        Text("message.response")
+//                            .font(.body)
+//                            .foregroundStyle(Color.primary)
+//                            .lineLimit(nil)
+//                            .fixedSize(horizontal: false, vertical: true)
+//                    }
+//                    .frame(maxWidth: .infinity, alignment: .topLeading)
+//                }
+//            }
+//            .listRowSeparator(.hidden)
             ForEach(chatData.messages) { message in
                 Section {
                     VStack(alignment: .leading) {
@@ -47,9 +47,10 @@ struct ListView: View {
                                 .foregroundStyle(Color.secondary)
                                 .lineLimit(nil)
                                 .fixedSize(horizontal: false, vertical: true)
-                                .padding()
+//                                .padding()
                         }
                         .frame(maxWidth: .infinity, alignment: .topLeading)
+                        .padding(.bottom)
                         
                         HStack(alignment: .firstTextBaseline) {
                             Image(systemName: "exclamationmark.bubble")
@@ -62,7 +63,6 @@ struct ListView: View {
                         .frame(maxWidth: .infinity, alignment: .topLeading)
                     }
                 }
-                .listRowSeparator(.hidden)
             }
         }
         .listStyle(.sidebar)
