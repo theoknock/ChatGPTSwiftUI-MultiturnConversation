@@ -29,7 +29,7 @@
         request.httpBody = jsonData
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer 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", forHTTPHeaderField: "Authorization")
+        request.addValue("", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
