@@ -1,67 +1,72 @@
 //
-//  ChatView.swift
+//  ListView.swift
 //  ChatGPTSwiftUI-MultiturnConversation
 //
-//  Created by Xcode Developer on 12/13/23.
+//  Created by Xcode Developer on 12/9/23.
 //
 
 import SwiftUI
 
 struct ChatView: View {
-    @ObservedObject var chatData : ChatData
+    @ObservedObject var chatData: ChatData
     
     var body: some View {
-        HStack {
-            HStack {
-                Button(action: {
-                    Task {
-//                        chatData.save()
-                        chatData.assistant()
+        List {
+            ForEach(chatData.messages) { message in
+                Section {
+                    HStack(alignment: .firstTextBaseline) {
+                        Text(message.prompt)
+                            .foregroundStyle(Color.primary)
+                            .lineLimit(nil)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .onTapGesture {
+                                UIPasteboard.general.string = message.prompt
+                            }
                     }
-                }) {
-                    Image(systemName: "arrow.up.doc")
-                        .aspectRatio(contentMode: .fit)
-                        .symbolRenderingMode(.palette)
-                        .fontWeight(.thin)
-                        .foregroundStyle(Color.primary)
-                }
-                .safeAreaPadding(.trailing)
-                .buttonStyle(.bordered)
-            }
-            HStack {
-                Button(action: {
-                    Task {
-//                        chatData.load()
+                }.listRowSeparator(.hidden)
+                .padding()
+//                .background(Color.init(uiColor: UIColor(white: 1.0, alpha: 0.1)))
+                .background(LinearGradient(gradient: Gradient(colors: [Color.init(uiColor: .systemBlue), Color.clear]), startPoint: .leading, endPoint: .trailing))
+                .clipShape(RoundedRectangle(cornerSize: CGSize(width: 10, height: 10), style: .continuous))
+                .listRowInsets(.init(top: 0, leading: 100, bottom: 0, trailing: 0))
+                
+                Section {
+                    HStack(alignment: .firstTextBaseline) {
+                        Text(message.response)
+                            .foregroundStyle(Color.primary)
+                            .lineLimit(nil)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .onTapGesture {
+                                UIPasteboard.general.string = message.response
+                            }
                     }
-                }) {
-                    Image.init(systemName: "arrow.down.doc")
-                        .aspectRatio(contentMode: .fit)
-                        .symbolRenderingMode(.palette)
-                        .fontWeight(.thin)
-                        .foregroundStyle(Color.primary)
-                }
-                .safeAreaPadding(.trailing)
-                .buttonStyle(.bordered)
+                }.listRowSeparator(.hidden)
+                .padding()
+//                .background(Color.init(uiColor: UIColor(white: 1.0, alpha: 0.1)))
+                .background(LinearGradient(gradient: Gradient(colors: [Color.green, Color.clear]), startPoint: .leading, endPoint: .trailing))
+                .clipShape(RoundedRectangle(cornerSize: CGSize(width: 10, height: 10), style: .continuous))
+                
             }
         }
-        .background(Color(uiColor: .quaternarySystemFill))
+        .listStyle(.plain)
+        .listSectionSpacing(0)
+        .task {
+            chatData.assistant()
+        }
         
         
-        //        GroupBox(label: Text("CHAT").font(.caption2), content: {
-        //            TextField(chatData.assistant_id, text: $chatData.assistant_id).font(.caption)
-        //            TextField(chatData.thread_id, text: $chatData.thread_id).font(.caption)
-        //            TextField(chatData.run_id, text: $chatData.run_id).font(.caption)
-        //        })
-        //        .groupBoxStyle(.automatic)
-        
-        //        Button(action: {
-        //            Task {
-        //                chatData.save()
-        //                chatData.assistant()
-        //                chatData.thread()
-        //            }
-        //        }) {
-        //            Label("Save", systemImage: "arrow.up.doc")
-        //        }
     }
 }
+
+struct ChatView_Previews: PreviewProvider {
+    static var previews: some View {
+        ChatView(chatData: ChatData())
+            .preferredColorScheme(.dark)
+    }
+}
+
+/*
+ .padding()
+ .background(Color.init(uiColor: UIColor(white: 1.0, alpha: 0.3)))
+ .clipShape(RoundedRectangle(cornerSize: CGSize(width: 10, height: 10), style: .continuous))
+ */

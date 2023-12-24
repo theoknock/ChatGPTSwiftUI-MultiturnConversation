@@ -14,7 +14,7 @@ import SwiftUI
     var prompt: String
     var response: String
     
-    init(id: String = sha256(), prompt: String = String(), response: String = String()) {
+    init(, prompt: String = String(), response: String = String()) {
         self.id = id
         self.prompt = prompt
         self.response = response

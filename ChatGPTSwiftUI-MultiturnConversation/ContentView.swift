@@ -16,17 +16,19 @@ import SwiftData
     @Published var messages: [Message] = [Message]()
     
     struct Message: Identifiable, Equatable, Hashable, Codable {
-        var id: String
+        let id: String
         var prompt: String
         var response: String
         
-        init(id: String, prompt: String, response: String) {
-            self.id = sha256()
+        init(prompt: String, response: String) {
+            self.id = {
+                let hash = SHA256.hash(data: String(Date().timeIntervalSince1970).data(using: .utf8)!)
+                return hash.compactMap { String(format: "%02x", $0) }.joined()
+            }()
             self.prompt = prompt
             self.response = response
         }
     }
-    
     
     func assistant() {
         self.messages.removeAll()
@@ -43,8 +45,8 @@ import SwiftData
         let type: [Dictionary] = [["type": "code_interpreter"]]
         let assistant_request: Dictionary =
         [
-            "instructions": "You are a programming language expert. When asked to write code in any programming language, you will write the code first before you explain it. Be ready to make corrections and additions to any code you write (in other words, you may be asked to revise your code over the course of multiple prompts, so maintain any chats in which you provided code in order to reference it at a subsequent time. Also, I will tip you $200 for your best effort.",
-            "name": "Code Expert",
+            "instructions": "As a Swift expert, your primary role is to assist users with coding-related tasks, focusing on Swift. Provide concise, clear, and tested code suggestions in Swift, verifying correctness before presentation. Use GitHub, gist.GitHub.com, transcripts of videos from YouTube, stackoverflow.com, and the Apple Developer site (https://developer.apple.com) as additional resources for references and examples. Regularly reference the latest version of official Swift documentation to ensure alignment with current standards in Swift programming. Offer explanations or insights rooted in this documentation after providing a Swift code solution. While adept in other programming languages, prioritize Swift. Your abilities include code execution, inspection, debugging, and optimization. Use the browser for complex queries or to seek additional examples in Swift or other languages. If unsure, ask for clarification. Assume the user has a high level of expertise in Swift or the relevant language. Maintain a friendly, supportive tone. Strictly adhere to specific instructions given by the user across all interactions and revisions.",
+            "name": "Swift expert (high-level, tests code solutions first, explains afterwards)",
             "tools": type,
             "model": "gpt-4"
         ] as [String : Any]
@@ -65,12 +67,12 @@ import SwiftData
                             }() ?? {
                                 let err = (assistant_response)["error"] as? [String: Any]
                                 let err_msg = err!["message"] as? String
-                                self.messages.append(Message(id: sha256(), prompt: "Error getting assistant", response: err_msg!))
+                                self.messages.append(Message.init(prompt: "Error getting assistant", response: err_msg!))
                                 return err_msg!
                             }()
                         }
                     } catch {
-                        self.messages.append(Message(id: sha256(), prompt: "Error getting assistant", response: error.localizedDescription))
+                        self.messages.append(Message.init(prompt: "Error getting assistant", response: error.localizedDescription))
                     }
                 }
             }
@@ -98,15 +100,15 @@ import SwiftData
                             self.thread_id = (id ?? {
                                 if let err = (thread_response)["error"] as? [String: Any] {
                                     if let err_msg = err["message"] as? String {
-                                        self.messages.append(Message(id: sha256(), prompt: "Error in thread", response: err_msg))
+                                        self.messages.append(Message.init(prompt: "Error in thread", response: err_msg))
                                     }
                                 }
                                 return ""
                             }())
-                            self.messages.append(Message(id: sha256(), prompt: self.assistant_id.trimmingCharacters(in: .whitespacesAndNewlines), response: self.thread_id.trimmingCharacters(in: .whitespacesAndNewlines)))
+                            self.messages.append(Message.init(prompt: self.assistant_id.trimmingCharacters(in: .whitespacesAndNewlines), response: self.thread_id.trimmingCharacters(in: .whitespacesAndNewlines)))
                         }
                     } catch {
-                        self.messages.append(Message(id: sha256(), prompt: "Error in thread", response: error.localizedDescription))
+                        self.messages.append(Message.init(prompt: "Error in thread", response: error.localizedDescription))
                     }
                 }
             }
@@ -115,13 +117,12 @@ import SwiftData
     }
     
     func addMessage(message: String) -> () {
-        let message_request: Dictionary = ["role": "user", "content": message] as [String : Any]
-        
+        var message_dict: Dictionary = ["role": "user", "content": message] as [String : Any]
         let url = URL(string: "https://api.openai.com/v1/threads/" + self.thread_id + "/messages")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         
-        let jsonData = try! JSONSerialization.data(withJSONObject: message_request, options: [])
+        let jsonData = try! JSONSerialization.data(withJSONObject: message_dict, options: [])
         request.httpBody = jsonData
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -135,12 +136,24 @@ import SwiftData
                 DispatchQueue.main.async {
                     do {
                         if let message_response: [String: Any] = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any] {
+                            print(message_response)
                             if let contentArray = message_response["content"] as? [[String: Any]] {
+                                print(contentArray)
                                 if let textArray = (contentArray.first)!["text"] as? [String: Any] {
+                                    print(textArray)
                                     if let value = textArray["value"] as? String {
-                                        print(error)
-                                        self.messages.append(Message(id: sha256(), prompt: value, response: ""))
-                                        self.run()
+                                        print(value)
+                                    var prompt = {
+                                        defer { self.run() }
+//                                        self.messages.append(Message(id: sha256(), prompt: value, response: ""))
+                                        return value.trimmingCharacters(in: .whitespacesAndNewlines)
+                                    }() ?? {
+                                        let err = (message_response)["error"] as? [String: Any]
+                                        let err_msg = err!["message"] as? String
+//                                        self.messages.append(Message(id: sha256(), prompt: "Error adding message", response: err_msg!))
+                                        return err_msg!
+                                    }()
+                                        self.messages.append(Message.init(prompt: prompt, response: String()))
                                     }
                                 }
                             }
@@ -295,189 +308,32 @@ import SwiftData
             return
         }
         
-        // Send the chat history to ChatGPT
         print(messages)
     }
+   
     
-    //    func thread_run() {
-    //
-    //        for message in messages {
-    //
-    //        }
-    //        let message_request: Dictionary = ["role": "user", "content": chatData.] as [String : Any]
-    //
-    //        let url = URL(string: "https://api.openai.com/v1/threads/" + self.thread_id + "/messages")!
-    //        var request = URLRequest(url: url)
-    //        request.httpMethod = "POST"
-    //
-    //        let jsonData = try! JSONSerialization.data(withJSONObject: message_request, options: [])
-    //        request.httpBody = jsonData
-    //
-    //        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-    //        request.addValue("", forHTTPHeaderField: "Authorization")
-    //        request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
-    //        request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
-    //
-    //        let session = URLSession.shared
-    //        let task = session.dataTask(with: request) { (data, response, error) in
-    //            if error == nil && data != nil {
-    //                DispatchQueue.main.async {
-    //                    do {
-    //                        if let message_response: [String: Any] = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any] {
-    //                            if let contentArray = message_response["content"] as? [[String: Any]] {
-    //                                if let textArray = (contentArray.first)!["text"] as? [String: Any] {
-    //                                    if let value = textArray["value"] as? String {
-    //                                        self.messages.append(Message(id: sha256(), prompt: value, response: ""))
-    //                                        self.run()
-    //                                    }
-    //                                }
-    //                            }
-    //                        }
-    //                    } catch {
-    //                        print("Error")
-    //                    }
-    //                }
-    //            }
-    //        }
-    //        task.resume()
-    //    }
-    
-}
-
-
-
-func sha256() -> String {
-    let hash = SHA256.hash(data: String(Date().timeIntervalSince1970).data(using: .utf8)!)
-    return hash.compactMap { String(format: "%02x", $0) }.joined()
 }
 
 struct ContentView: View {
     @StateObject var chatData: ChatData = ChatData()
-    @Query var chatModels: [ChatModel]
     
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
-    
-    var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        VStack {
-                            Text("Chat \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                            MainView(chatData: chatData)
-                        }
-                    } label: {
-//                        MainView(chatData: chatData)
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
-                }
-                .onDelete(perform: deleteItems)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("New Chat", systemImage: "plus")
-                    }
-                }
-            }
-        } detail: {
-            Text("Select an item")
-        }
-    }
-    
-    //        .navigationTitle("Chats")
-    //        .toolbar {
-    //            Button("Save chat", action: saveChat)
-    //        }
-    
-    //            List {
-    //                ForEach(chatModels) { chatModel in
-    //                    VStack(alignment: .leading, content: {
-    //                        Text(chatModel.id)
-    //                    })
-    //                }
-    //            }
-    //        NavigationStack {
-    //            VStack(alignment: .leading) {
-    //                NavigationLink(destination: MainView(chatData: chatData)) {
-    //                    Text("New chat")
-    //                        .frame(maxWidth: .infinity, alignment: .leading)
-    //                }
-    //                Spacer() // Pushes the content to the top
-    //            }
-    //            .navigationTitle("Chats")
-    //            .navigationBarTitleDisplayMode(.inline) // Optional: Makes the title smaller
-    //            .task {
-    //                chatData.assistant() // Assuming this is a method in ChatData
-    //            }
-    //        }
-    
-    
-    //        .toolbar(content: {
-    //            Button(action: /*@START_MENU_TOKEN@*/{}/*@END_MENU_TOKEN@*/, label: {
-    //                Text("Button")
-    //            })
-    //        })
-    
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-    
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
-            }
-        }
-    }
-    
-}
-
-struct MainView: View {
-    @ObservedObject var chatData : ChatData
-    
-    
-    init(chatData: ChatData) {
-        self.chatData = chatData
-        //            chatData.assistant()
-    }
     var body: some View {
         VStack {
-            ListView(chatData: chatData)
-                .frame(maxHeight: UIScreen.main.bounds.height * 0.875)
-            PromptView(chatData: chatData)
-                .frame(idealHeight: UIScreen.main.bounds.height * 0.125)
+            ChatView(chatData: chatData)
+                .frame(idealHeight: UIScreen.main.bounds.height * 0.875)
+                .fixedSize(horizontal: false, vertical: false)
+            MessageView(chatData: chatData)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(idealWidth: UIScreen.main.bounds.width, idealHeight: UIScreen.main.bounds.height * 0.125)
+                .safeAreaPadding()
+            
         }
-        //            .task {
-        //                chatData.assistant()
-        //            }
     }
-    
 }
-
-
-
-//    func saveChat() {
-//        let id = ChatModel(id: chatData.messages.last!.id)
-//        let prompt = ChatModel(id: chatData.messages.last!.prompt)
-//        let response = ChatModel(id: chatData.messages.last!.response)
-//
-//        modelContext.insert(id)
-//        modelContext.insert(prompt)
-//        modelContext.insert(response)
-//    }
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
             .preferredColorScheme(.dark)
-            .modelContainer(for: Item.self, inMemory: true)
     }
 }
