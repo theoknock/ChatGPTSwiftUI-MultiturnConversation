@@ -13,14 +13,15 @@ struct MessageView: View {
     
     var body: some View {
         HStack {
-            Group {
+            HStack {
+                //                        Group {
                 TextField(("Message ChatGTP..."), text: $prompt, axis: .vertical)
-                    .lineLimit(3)
                     .padding()
-                    .background(Color.init(uiColor: UIColor(white: 1.0, alpha: 0.5)))
-                    .foregroundColor(Color.primary)
-                    .clipShape(RoundedRectangle(cornerSize: CGSize(width: 10, height: 10), style: .continuous))
-                
+                //                .padding(.horizontal)
+                //                .blur(radius: 3.0, opaque: false)
+            }
+            
+            HStack {
                 Button(action: {
                     Task {
                         let prompt_tidy = prompt.trimmingCharacters(in: NSCharacterSet.whitespacesAndNewlines)
@@ -30,15 +31,57 @@ struct MessageView: View {
                         prompt = String()
                     }
                 }, label: {
-                    Image(systemName: "arrow.up.circle.fill")
-                        .resizable()
+                    Label("", systemImage: "arrow.up.circle")
+                    //                    .foregroundStyle(LinearGradient(gradient: .init(colors: [Color(hue: 0.5861111111, saturation: 0.55, brightness: 0.58), Color(hue: 0.5916666667, saturation: 1.0, brightness: 0.27)]), startPoint: .topTrailing, endPoint: .bottomLeading))
+                    //                    .background(LinearGradient(gradient: .init(colors: [ Color(hue: 0.5916666667, saturation: 1.0, brightness: 0.27), Color(hue: 0.5861111111, saturation: 0.55, brightness: 0.58)]), startPoint: .bottomTrailing, endPoint: .center))
+                        .symbolRenderingMode(.hierarchical)
                         .font(.largeTitle)
-                        .symbolRenderingMode(.multicolor)
-                        .imageScale(/*@START_MENU_TOKEN@*/.large/*@END_MENU_TOKEN@*/)
+                        .imageScale(.large)
+                        .labelStyle(.iconOnly)
+                        .clipShape(Capsule())
                 })
-                .fixedSize(horizontal: true, vertical: true)
+                //            .ignoresSafeArea()
+                //            .shadow(color: .white, radius: 5)
+                //                        }
+                
+                
+                
+                
+                //                .background(Color.init(uiColor: UIColor(white: 1.0, alpha: 0.2)))
+                //                .clipShape(RoundedRectangle(cornerSize: CGSize(width: 10, height: 10), style: .continuous))
+                //                Button(action: {
+                //
+                //                }, label: {
+                //                    Label("", systemImage: "arrow.up")
+                //                        .lineLimit(3)
+                //                        .padding()
+//                                        .background(Color.init(uiColor: UIColor(white: 1.0, alpha: 0.2)))
+                //                        .clipShape(RoundedRectangle(cornerSize: CGSize(width: 10, height: 10), style: .continuous))
+                //                        .labelStyle(.iconOnly)
+                //                        .font(.largeTitle)
+                //                        .lineLimit(3)
+                //                        .padding()
+                //                        .foregroundStyle(Color.primary)
+                //                        .background(Color.initiColor: UIColor(white: 1.0, alpha: 0.2)))
+                //                        .clipShape(RoundedRectangle(cornerSize: CGSize(width: 10, height: 10), style: .continuous))
+                
+                //                    Image(systemName: <#T##String#> systemImage: "arrow.up.circle")
+                //                        .resizable()
+                //                        .font(.largeTitle)
+                //                        .imageScale(.large)
+                //                        .foregroundColor(Color.secondary)
+                //                        .symbolRenderingMode(.hierarchical)
+                
+                //                })
+                //                .fixedSize(horizontal: true, vertical: true)
+                //        }:
             }
+            .ignoresSafeArea()
+            .background(Color.init(uiColor: UIColor(white: 1.0, alpha: 0.2)))
+            .clipShape(RoundedRectangle(cornerSize: CGSize(width: 25, height: 25), style: .continuous))
         }
+        .background(Color.init(uiColor: UIColor(white: 1.0, alpha: 0.2)))
+        .clipShape(RoundedRectangle(cornerSize: CGSize(width: 25, height: 25), style: .continuous))
     }
 }
 

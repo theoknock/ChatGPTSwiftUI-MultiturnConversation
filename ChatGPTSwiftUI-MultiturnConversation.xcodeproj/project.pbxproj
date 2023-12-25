@@ -74,8 +74,8 @@
 			isa = PBXGroup;
 			children = (
 				B9EA3BF72B23431800186625 /* ChatGPTSwiftUI_MultiturnConversationApp.swift */,
-				B9EA3BF92B23431800186625 /* ContentView.swift */,
 				B9ADB1F12B38A36100EF42DF /* ChatView.swift */,
+				B9EA3BF92B23431800186625 /* ContentView.swift */,
 				B9ADB1F32B38A42B00EF42DF /* MessageView.swift */,
 				B9EA3BFB2B23431900186625 /* Assets.xcassets */,
 				B97F2D2D2B2A9B7B00053102 /* CodeCemetary.md */,

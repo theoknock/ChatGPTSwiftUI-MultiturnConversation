@@ -22,7 +22,7 @@ import SwiftData
         
         init(prompt: String, response: String) {
             self.id = {
-                let hash = SHA256.hash(data: String(Date().timeIntervalSince1970).data(using: .utf8)!)
+                var hash = SHA256.hash(data: String(Date().timeIntervalSince1970).data(using: .utf8)!)
                 return hash.compactMap { String(format: "%02x", $0) }.joined()
             }()
             self.prompt = prompt
@@ -33,12 +33,15 @@ import SwiftData
     func assistant() {
         self.messages.removeAll()
         
+        self.messages.append(Message.init(prompt: "prompt", response: "response"))
+    
+        
         let url = URL(string: "https://api.openai.com/v1/assistants")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -63,12 +66,11 @@ import SwiftData
                             let id = assistant_response["id"] as? String
                             self.assistant_id = {
                                 defer { self.thread() }
-                                return id!.trimmingCharacters(in: .whitespacesAndNewlines)
+                                return assistant_response["id"] as? String
                             }() ?? {
-                                let err = (assistant_response)["error"] as? [String: Any]
-                                let err_msg = err!["message"] as? String
-                                self.messages.append(Message.init(prompt: "Error getting assistant", response: err_msg!))
-                                return err_msg!
+                                let err = ((assistant_response)["error"] as? [String: Any])!["message"] as? String
+                                self.messages.append(Message.init(prompt: "Error getting assistant", response: err!))
+                                return err!
                             }()
                         }
                     } catch {
@@ -86,7 +88,7 @@ import SwiftData
         request.httpMethod = "POST"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -96,19 +98,18 @@ import SwiftData
                 DispatchQueue.main.async {
                     do {
                         if let thread_response = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any] {
-                            let id = thread_response["id"] as? String
-                            self.thread_id = (id ?? {
-                                if let err = (thread_response)["error"] as? [String: Any] {
-                                    if let err_msg = err["message"] as? String {
-                                        self.messages.append(Message.init(prompt: "Error in thread", response: err_msg))
-                                    }
-                                }
-                                return ""
-                            }())
+                            self.thread_id = {
+                                return thread_response["id"] as? String
+                            }() ?? {
+                                let err = (thread_response)["error"] as? [String: Any]
+                                let err_msg = err!["message"] as? String
+                                self.messages.append(Message.init(prompt: "Error getting thread", response: err_msg!))
+                                return err_msg!
+                            }()
                             self.messages.append(Message.init(prompt: self.assistant_id.trimmingCharacters(in: .whitespacesAndNewlines), response: self.thread_id.trimmingCharacters(in: .whitespacesAndNewlines)))
                         }
                     } catch {
-                        self.messages.append(Message.init(prompt: "Error in thread", response: error.localizedDescription))
+                        self.messages.append(Message.init(prompt: "Error getting thread", response: error.localizedDescription))
                     }
                 }
             }
@@ -117,7 +118,7 @@ import SwiftData
     }
     
     func addMessage(message: String) -> () {
-        var message_dict: Dictionary = ["role": "user", "content": message] as [String : Any]
+        let message_dict: Dictionary = ["role": "user", "content": message] as [String : Any]
         let url = URL(string: "https://api.openai.com/v1/threads/" + self.thread_id + "/messages")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -126,7 +127,7 @@ import SwiftData
         request.httpBody = jsonData
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -143,7 +144,7 @@ import SwiftData
                                     print(textArray)
                                     if let value = textArray["value"] as? String {
                                         print(value)
-                                    var prompt = {
+                                    let prompt = {
                                         defer { self.run() }
 //                                        self.messages.append(Message(id: sha256(), prompt: value, response: ""))
                                         return value.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -175,7 +176,7 @@ import SwiftData
         request.httpMethod = "POST"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -207,7 +208,7 @@ import SwiftData
         request.httpMethod = "GET"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -219,7 +220,7 @@ import SwiftData
                         if let retrieve_response = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any] {
                             if (retrieve_response["status"] as? String) != "completed" {
                                 self.messages[self.messages.count - 1].response = (retrieve_response["status"] as? String)!
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: {
                                     self.messages[self.messages.count - 1].response = " "
                                     self.retrieve()
                                 })
@@ -242,7 +243,7 @@ import SwiftData
         request.httpMethod = "GET"
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer ", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer", forHTTPHeaderField: "Authorization")
         request.addValue("org-jGOqXYFRJHKlnkff8K836fK2", forHTTPHeaderField: "OpenAI-Organization")
         request.addValue("assistants=v1", forHTTPHeaderField: "OpenAI-Beta")
         
@@ -257,7 +258,6 @@ import SwiftData
                                     if let textArray = (contentArray.first)!["text"] as? [String: Any] {
                                         let value = textArray["value"] as! String
                                         self.messages[self.messages.count - 1].response = value
-                                        self.save()
                                     }
                                 }
                             }
@@ -320,14 +320,19 @@ struct ContentView: View {
     var body: some View {
         VStack {
             ChatView(chatData: chatData)
-                .frame(idealHeight: UIScreen.main.bounds.height * 0.875)
+                .safeAreaPadding(.top)
+                .frame(idealWidth: UIScreen.main.bounds.width, idealHeight: UIScreen.main.bounds.height * 0.875)
                 .fixedSize(horizontal: false, vertical: false)
+                .task {
+                    chatData.assistant()
+                }
+                
             MessageView(chatData: chatData)
-                .fixedSize(horizontal: false, vertical: true)
                 .frame(idealWidth: UIScreen.main.bounds.width, idealHeight: UIScreen.main.bounds.height * 0.125)
-                .safeAreaPadding()
-            
+                .fixedSize(horizontal: false, vertical: true)
+                .safeAreaPadding(.bottom)
         }
+        .background(LinearGradient(gradient: .init(colors: [Color(hue: 0.5861111111, saturation: 0.55, brightness: 0.58), Color(hue: 0.5916666667, saturation: 1.0, brightness: 0.27)]), startPoint: .trailing, endPoint: .bottomLeading))
     }
 }
 
@@ -337,3 +342,4 @@ struct ContentView_Previews: PreviewProvider {
             .preferredColorScheme(.dark)
     }
 }
+
