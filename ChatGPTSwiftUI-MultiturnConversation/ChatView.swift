@@ -9,116 +9,95 @@ import SwiftUI
 
 struct ChatView: View {
     @ObservedObject var chatData: ChatData
+    @State private var lastMessageId: String?
     
     var body: some View {
-        //        List {
-        //            ForEach(chatData.messages) { message in
-        //                VStack(alignment: .leading, spacing: 0.0, content: {
-        //                    Section {
-        //                        VStack {
-        List {
-            ForEach(chatData.messages) { message in
-                Group {
-                    Text(message.prompt)
-                        .listRowBackground(LinearGradient(colors: [Color(hue: 0.5916666667, saturation: 1.0, brightness: 0.27), Color(hue: 0.5861111111, saturation: 0.55, brightness: 0.58)], startPoint: .top, endPoint: .bottom))
-                        .clipShape(UnevenRoundedRectangle(cornerRadii: RectangleCornerRadii(topLeading: 7.5, bottomLeading: 0.0, bottomTrailing: 0.0, topTrailing: 7.5), style: .continuous))
-                    Text(message.response)
-                        .listRowBackground(Color(hue: 0.5861111111, saturation: 0.55, brightness: 0.58))
-                        .clipShape(UnevenRoundedRectangle(cornerRadii: RectangleCornerRadii(topLeading: 0.0, bottomLeading: 7.5, bottomTrailing: 7.5, topTrailing: 0.0), style: .continuous))
-                    Spacer()
-                        .listRowBackground(Color(hue: 0.5861111111, saturation: 0.55, brightness: 0.58))
-                    
-                }
+        ScrollViewReader { scrollView in
+            List(chatData.messages) { message in
+                let message_id = message.id
                 
-                //                .padding(.vertical)
+                Section {
+                    HStack(alignment: .bottom, spacing: 0.0, content: {
+                        Text(message.prompt)
+                            .font(.body).fontWeight(.ultraLight)
+                            
+                    })
+                    .listRowBackground(
+                        UnevenRoundedRectangle(cornerRadii: RectangleCornerRadii(topLeading: 25.0, bottomLeading: 0.0, bottomTrailing: 0.0, topTrailing: 25.0))
+                            .strokeBorder(Color.init(uiColor: .gray).opacity(0.25), lineWidth: 1.0)
+                        //                            .shadow(color: Color.gray, radius: 3.0)
+                    )
+                    
+                    HStack(alignment: .top, spacing: 0.0, content: {
+                        Text(message.response)
+                            .font(.body).fontWeight(.light)
+                    })
+                    .listRowBackground(
+                        UnevenRoundedRectangle(cornerRadii: RectangleCornerRadii(topLeading: 0.0, bottomLeading: 25.0, bottomTrailing: 25.0, topTrailing: 0.0))
+                            .fill(Color.init(uiColor: .gray).opacity(0.25))
+                        //                            .shadow(color: Color.gray, radius: 3.0)
+                    )
+                }
+                .listSectionSpacing(25.0)
+                .id(message_id)
+//                .task {
+//                    if message_id == chatData.messages.last?.id {
+//                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+//                            scrollView.scrollTo(message_id, anchor: .bottom)
+//                        }
+//                    }
+//                }
+//                .task {
+//                    if message_id == chatData.messages.last?.id {
+//                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+//                            scrollView.scrollTo(message_id, anchor: .bottom)
+//                        }
+//                    }
+//                }
+            }
+            .listStyle(.plain)
+            .listRowSpacing(0)
+            .scrollContentBackground(.hidden)
+            .onAppear {
+                lastMessageId = chatData.messages.last?.id
+            }
+            .onChange(of: chatData.messages) { _ in
+                lastMessageId = chatData.messages.last?.id
+            }
+            .onOrientationChange {
+                if let lastMessageId = lastMessageId {
+                    scrollView.scrollTo(lastMessageId, anchor: .bottom)
+                }
             }
         }
-        .listSectionSpacing(.compact)
-        //                            Text(message.prompt)
-        //                                .background {
-        //                                    Color.clear
-        ////                                        .blur(radius: 8, opaque: false)
-        //                                }
-        //                            .background(.white)
-        
-        ////                            .frame(width: UIScreen.main.bounds.width)
-        //                            .padding(.top)
-        //                            .foregroundStyle(Color.primary)
-        //                            .background(Color.clear)
-        //                        //                            .background(LinearGradient(colors: [Color(hue: 0.5916666667, saturation: 1.0, brightness: 0.27), Color(hue: 0.5861111111, saturation: 0.55, brightness: 0.58)], startPoint: .top, endPoint: .bottom))
-        //                            .lineLimit(nil)
-        //                            .fixedSize(horizontal: true, vertical: false)
-        //                            .onTapGesture {
-        //                                UIPasteboard.general.string = message.prompt
-        //                            }
-        //                            .clipShape(UnevenRoundedRectangle(cornerRadii: RectangleCornerRadii(topLeading: 10.0,  bottomLeading: 0.0, bottomTrailing: 0.0, topTrailing: 10.0), style: .continuous))
-        //                        }
-        //                        .background {
-        //                            LinearGradient(colors: [Color(hue: 0.5916666667, saturation: 1.0, brightness: 0.27), Color(hue: 0.5861111111, saturation: 0.55, brightness: 0.58)], startPoint: .top, endPoint: .bottom)
-        //                                        .blur(radius: 8, opaque: false)
-        //                        }
-        ////                        .background(LinearGradient(colors: [Color(hue: 0.5916666667, saturation: 1.0, brightness: 0.27), Color(hue: 0.5861111111, saturation: 0.55, brightness: 0.58)], startPoint: .top, endPoint: .bottom))
-        //
-        //                        }.listRowSeparator(.hidden)
-        //
-        //                        //                        .padding()
-        ////                                                .background(LinearGradient(gradient: Gradient(colors: [Color.init(uiColor: .systemBlue), Color.clear]), startPoint: .leading, endPoint: .trailing))
-        ////                                                .blur(radius: 3.0)
-        //                        //                        .clipShape(RoundedRectangle(cornerSize: CGSize(width: 10, height: 10), style: .continuous))
-        //                        //                        .listRowInsets(.init(top: 0, leading: 100, bottom: 0, trailing: 0))
-        //
-        //                        Section {
-        //                            VStack {
-        //                                Text(message.response)
-        //                                ////                            .frame(idealWidth: UIScreen.main.bounds.width)
-        //                                //                            .padding(.bottom)
-        //                                //                            .foregroundStyle(Color.primary)
-        //                                ////                            .background(Color.clear)
-        //                                //                        //                            .background(LinearGradient(colors: [Color(hue: 0.5916666667, saturation: 1.0, brightness: 0.27), Color(hue: 0.5861111111, saturation: 0.55, brightness: 0.58)], startPoint: .bottom, endPoint: .top))
-        //                                //                            .lineLimit(nil)
-        //                                //                   )         .fixedSize(horizontal: true, vertical: false)
-        //                                //                            .onTapGesture {
-        //                                //                                UIPasteboard.general.string = message.response
-        //                                //                            }
-        //                                //                            .clipShape(UnevenRoundedRectangle(cornerRadii: RectangleCornerRadii(topLeading: 0.0,  bottomLeading: 10.0, bottomTrailing: 10.0, topTrailing: 0.0), style: .continuous))
-        //                                //
-        //                                //
-        //                                //
-        //                            }
-        //                        }.listRowSeparator(.hidden)
-        //
-        //                        //                        .padding()
-        //                        //                        .background(LinearGradient(gradient: Gradient(colors: [Color.green, Color.clear]), startPoint: .leading, endPoint: .trailing))
-        //                        //                        .clipShape(RoundedRectangle(cornerSize: CGSize(width: 10, height: 10), style: .continuous))
-        //                    })
-        ////                    .background(Color.clear)
-        //                    }
-        //
-        //                })
-        
-        
-        //        .listStyle(.plain)
-        //        .background(Color.clear)
-        //                    .scrollContentBackground(.hidden)
-        
-        //        .background(LinearGradient(gradient: .init(colors: [Color(hue: 0.5916666667, saturation: 1.0, brightness: 0.27), Color(hue: 0.5861111111, saturation: 0.55, brightness: 0.58)]), startPoint: .topTrailing, endPoint: .bottomLeading))
-        
-        //                        .listSectionSpacing(0)
-        
-        
-        
-        //                       })
-        //            }
-        //        }
     }
 }
 
 struct ChatView_Previews: PreviewProvider {
     static var previews: some View {
-        ChatView(chatData: ChatData())
+        ContentView()
+        //        ChatView(chatData: ChatData())
             .preferredColorScheme(.dark)
     }
 }
+
+struct OrientationChangeDetector: ViewModifier {
+    let action: () -> Void
+    
+    func body(content: Content) -> some View {
+        content
+            .onReceive(NotificationCenter.default.publisher(for: UIDevice.orientationDidChangeNotification)) { _ in
+                action()
+            }
+    }
+}
+
+extension View {
+    func onOrientationChange(perform action: @escaping () -> Void) -> some View {
+        self.modifier(OrientationChangeDetector(action: action))
+    }
+}
+
 
 /*
  .padding()
